@@ -421,7 +421,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
           <label class="fgl">Container</label>
           <div class="fg-cnt">
             <select class="fgi" id="expSize"><option value="20">20'</option><option value="40" selected>40'</option></select>
-            <select class="fgi" id="expType"><option value="dry">Dry</option><option value="high">High Cube</option><option value="href">Hanger / Reefer</option></select>
+            <select class="fgi" id="expType"><option value="dry">Dry</option><option value="high">High Cube</option><option value="reefer">Reefer</option><option value="imo">IMO / DG</option></select>
           </div>
         </div>
         <div class="fg">
@@ -475,6 +475,13 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
           <div class="banner-ttl">Customs Documentation Deadline</div>
           <div class="banner-val" id="expCustomsVal">—</div>
           <div class="banner-sub">All customs documents must be submitted before this time · Loading date/time + 3 hours</div>
+        </div>
+      </div>
+      <div class="banner-card danger" id="expImoReeferBanner" style="display:none">
+        <div class="banner-icon">🚨</div>
+        <div class="banner-body">
+          <div class="banner-ttl">IMO / Reefer — ISR Required (Duisburg)</div>
+          <div class="banner-sub">IMO and Reefer containers via Duisburg are on request only. CX must raise an ISR before booking.</div>
         </div>
       </div>
       <div class="section-ttl" id="expBargeTitle" style="display:none"></div>
@@ -594,7 +601,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
           <tr><td class="cid">EC-1</td><td>No departures found</td><td>"No departures found. Contact inland team."</td></tr>
           <tr><td class="cid">EC-2</td><td>Same-day loading (export)</td><td>Excluded — next-day departure shown with cutoff warning</td></tr>
           <tr><td class="cid">EC-3</td><td>ZIP not covered</td><td>"Postcode not in matrix. Contact inland team."</td></tr>
-          <tr><td class="cid">EC-4</td><td>DEDUIRR depot (export)</td><td>ISR banner shown, no schedules</td></tr>
+          <tr><td class="cid">EC-4</td><td>IMO / Reefer via Duisburg (export)</td><td>ISR warning banner shown — on request only</td></tr>
           <tr><td class="cid">EC-5</td><td>No import rail to Frankenbach/Germersheim</td><td>Only barge options shown for these terminals</td></tr>
           <tr><td class="cid">EC-6</td><td>Order deadline passed (import)</td><td>ISR section with email template</td></tr>
         </table></div>
@@ -680,6 +687,7 @@ function resetTool(){
   document.getElementById('expEmpty').style.display='block';
   document.getElementById('expDepotRack').innerHTML='';
   document.getElementById('expCustomsBanner').style.display='none';
+  document.getElementById('expImoReeferBanner').style.display='none';
   document.getElementById('expBargeTitle').style.display='none';
   document.getElementById('expBargeList').innerHTML='';
   // Scroll to top
@@ -974,10 +982,10 @@ function buildImpRef(){
 // EXPORT PLANNER - DATA & LOGIC
 // ══════════════════════════════════════════════════════
 const EXP_DEPOTS={
-  'DEDUI01':'Hutchison Ports Duisburg','DEDUI03':'DIT Depot Duisburg','DEDUIRR':'RRT Depot Duisburg',
+  'DEDUI01':'Hutchison Ports Duisburg',
   'DEDTM01':'CTD Dortmund','DEBNX01':'Bonn AZS','DETREAZ':'Trier AZS','DEAJHRA':'Rheinhafen Andernach',
   'DEG4TG':'Gustavsburg Contargo','DEMNZ01':'Mainz Frankenbach','DEGRH01':'Germersheim DPW',
-  'DEMUN01':'Muenchen (Rail Hub)','DENUE02':'Nuernberg CDN (Rail Hub)',
+  'DEMUN01':'Muenchen (Rail Hub)','DENUE02':'Nuernberg CDN',
 };
 const EXP_TERM_NAMES={'NLROTTM':'APM Terminals Rotterdam','NLROTWG':'Rotterdam World Gateway','NLROT01':'Hutchison Ports Delta II','NLROT21':'ECT Delta Terminal','BEANT869':'PSA Europa Terminal','BEANT913':'PSA Noordzee Terminal'};
 
@@ -989,33 +997,49 @@ const EXP_SCHED={
   'DEG4TG':{RTM:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:4,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}],ANR:[{mod:'Barge',dep:3,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
   'DEMHG02':{RTM:[{mod:'Barge',dep:1,transit:4,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}],ANR:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:4,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
   'DEMNZ01':{RTM:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}]},
+  // Nürnberg Rail Export — RTM only, terminal-filtered from Hutchison Ports schedule
+  // NR11: Mon dep → Cargo available Tue/Wed → transit 1d → ECT EMX (NLROT21), APMT-2 (NLROTTM)
+  // NR31: Wed dep → Cargo available Thu → transit 1d → RWG (NLROTWG), APMT-2 (NLROTTM), HP Delta II (NLROT01)
+  // NR41: Thu dep → Cargo available Fri/Sat → transit 1d → HP Delta II (NLROT01), ECT EMX (NLROT21), APMT-2 (NLROTTM)
+  // NR51: Fri dep → Cargo available Sat → transit 1d → HP Delta II (NLROT01), APMT-2 (NLROTTM), RWG (NLROTWG)
+  // NR61: Sat dep → Cargo available Mon → transit 2d → HP Delta II (NLROT01), APMT-2 (NLROTTM)
+  'DENUE02':{RTM:[
+    {mod:'Rail',dep:1,transit:1,buffer:2,terms:['NLROT21','NLROTTM','NLROT01']},
+    {mod:'Rail',dep:3,transit:1,buffer:2,terms:['NLROTWG','NLROTTM','NLROT01']},
+    {mod:'Rail',dep:4,transit:1,buffer:2,terms:['NLROT01','NLROT21','NLROTTM']},
+    {mod:'Rail',dep:5,transit:1,buffer:2,terms:['NLROT01','NLROTTM','NLROTWG','NLROT21']},
+    {mod:'Rail',dep:6,transit:2,buffer:2,terms:['NLROT01','NLROTTM']},
+  ]},
 };
 
 const EXP_RULES=[
   {id:'r01',zipLabel:'31000–31999',ranges:[[31000,31999]],rtm:{p1:'DEDTM01'},anr:{p1:null},isrOnP3:false},
-  {id:'r02',zipLabel:'32000–34999',ranges:[[32000,34999]],rtm:{p1:'DEDUI01',p2:'DEDUI03',p3:'DEDUIRR'},anr:{p1:'DEDUI01'},isrOnP3:true},
+  {id:'r02',zipLabel:'32000–34999',ranges:[[32000,34999]],rtm:{p1:'DEDUI01'},anr:{p1:'DEDUI01'},isrOnP3:false},
   {id:'r03',zipLabel:'35000–36999',ranges:[[35000,36999]],rtm:{p1:'DEMNZ01'},anr:{p1:'DEMNZ01'},isrOnP3:false},
   {id:'r04',zipLabel:'37000–39999',ranges:[[37000,39999]],rtm:{p1:'DEDTM01'},anr:{p1:'DEDUI01'},isrOnP3:false},
-  {id:'r05',zipLabel:'40000–47999',ranges:[[40000,47999]],rtm:{p1:'DEDUI01',p2:'DEDUI03',p3:'DEDUIRR'},anr:{p1:'DEDUI01'},isrOnP3:true},
+  {id:'r05',zipLabel:'40000–47999',ranges:[[40000,47999]],rtm:{p1:'DEDUI01'},anr:{p1:'DEDUI01'},isrOnP3:false},
   {id:'r06',zipLabel:'48000–53999',ranges:[[48000,53999]],rtm:{p1:'DEDUI01'},anr:{p1:'DEDUI01'},isrOnP3:false},
   {id:'r07',zipLabel:'54000–54999',ranges:[[54000,54999]],rtm:{p1:'DETREAZ'},anr:{p1:'DETREAZ'},isrOnP3:false},
   {id:'r08',zipLabel:'55000–55999',ranges:[[55000,55999]],rtm:{p1:'DEMNZ01'},anr:{p1:'DEMNZ01'},isrOnP3:false},
   {id:'r09',zipLabel:'56000–56999',ranges:[[56000,56999]],rtm:{p1:'DEBNX01'},anr:{p1:'DEBNX01'},isrOnP3:false},
-  {id:'r10',zipLabel:'57000–59999',ranges:[[57000,59999]],rtm:{p1:'DEDUI01',p2:'DEDUI03',p3:'DEDUIRR'},anr:{p1:'DEDUI01'},isrOnP3:true},
+  {id:'r10',zipLabel:'57000–59999',ranges:[[57000,59999]],rtm:{p1:'DEDUI01'},anr:{p1:'DEDUI01'},isrOnP3:false},
   {id:'r11',zipLabel:'60000–65999',ranges:[[60000,65999]],rtm:{p1:'DEG4TG'},anr:{p1:'DEG4TG'},isrOnP3:false},
   {id:'r12',zipLabel:'66000–89999',ranges:[[66000,89999]],rtm:{p1:'DEGRH01'},anr:{p1:'DEGRH01'},isrOnP3:false},
-  {id:'r13',zipLabel:'90000–97999',ranges:[[90000,97999]],rtm:{p1:'DEMNZ01'},anr:{p1:'DEMNZ01'},isrOnP3:false},
+  {id:'r13',zipLabel:'90000–97999',ranges:[[90000,97999]],rtm:{p1:'DENUE02'},anr:{p1:null},isrOnP3:false},
 ];
 
 function expFindRule(zip){const z=parseInt(zip,10);for(const r of EXP_RULES){if(r.ranges.some(([lo,hi])=>z>=lo&&z<=hi))return r;}return null;}
 
-function expGetNextDeps(code,port,loadingDate,loadTimeStr,n=2){
+function expGetNextDeps(code,port,loadingDate,loadTimeStr,n=2,termCode){
   const sch=(EXP_SCHED[code]||{})[port];if(!sch||!sch.length)return{deps:[],skipped:[]};
+  // Filter schedules by terminal compatibility if terms array exists
+  const filtered=termCode?sch.filter(s=>!s.terms||s.terms.includes(termCode)):sch;
+  if(!filtered.length)return{deps:[],skipped:[]};
   const[lh,lm]=(loadTimeStr||'08:00').split(':').map(Number);const loadingAfterNoon=(lh*60+lm)>=720;
   const found=[];const skipped=[];
   for(let offset=0;offset<=25&&found.length<n;offset++){
     const d=addDays(loadingDate,offset);const dow=jsDay(d);
-    for(const s of sch){
+    for(const s of filtered){
       if(s.dep!==dow)continue;if(offset===0)continue;
       if(offset===1&&loadingAfterNoon){skipped.push({mod:s.mod,etd:new Date(d),reason:'next-day-cutoff'});continue;}
       if(found.length<n){
@@ -1064,6 +1088,10 @@ function expRun(){
   if(opts.p2)dp+=pill(opts.p2,2,false,false,'');
   if(opts.p3)dp+=pill(opts.p3,3,rule.isrOnP3,false,'');
   document.getElementById('expDepotRack').innerHTML=dp;
+  // IMO/Reefer ISR warning for Duisburg
+  const isDuisburg=opts.p1==='DEDUI01';
+  const isImoReefer=(type==='reefer'||type==='imo');
+  document.getElementById('expImoReeferBanner').style.display=(isDuisburg&&isImoReefer)?'flex':'none';
   // Customs deadline
   const[lh2,lm2]=loadTime.split(':').map(Number);
   const deadlineDate=new Date(loadingDate);deadlineDate.setHours(lh2,lm2+180,0,0);
@@ -1079,16 +1107,15 @@ function expSelectDepot(code){
   if(!termVal||!loadDate)return;
   document.querySelectorAll('#page-export .depot-pill[data-depot]').forEach(p=>p.classList.toggle('selected',p.dataset.depot===code));
   const bargeList=document.getElementById('expBargeList');const bargeTitle=document.getElementById('expBargeTitle');
-  if(code==='DEDUIRR'){bargeTitle.style.display='none';bargeList.innerHTML='<div class="deduirr-banner">⛔ Please Raise an ISR for booking possibilities</div>';return;}
   const[termCode,yotStr,port]=termVal.split('|');const yot=parseInt(yotStr);const loadingDate=parseDate(loadDate);
   const loadTimeStr=document.getElementById('expLoadTime').value||'08:00';
-  const{deps,skipped}=expGetNextDeps(code,port,loadingDate,loadTimeStr);
+  const{deps,skipped}=expGetNextDeps(code,port,loadingDate,loadTimeStr,2,termCode);
   const name=EXP_DEPOTS[code]||code;
   bargeTitle.style.display='block';bargeTitle.textContent=`${name} — Departures & Vessel Booking Window`;
   if(!deps.length){
     let skipN='';
     if(skipped.length){const s=skipped[0];skipN=`<div class="bc-skipped">${s.mod==='Rail'?'🚂':'🛳'} <strong>${s.mod} on ${fmtS(s.etd)}</strong> was skipped — loading after 12:00 does not allow enough time.</div>`;}
-    const noSchedDepots=['DEMUN01','DENUE02','DETREAZ','DEDUI03','DEDTM01'];
+    const noSchedDepots=['DEMUN01','DETREAZ','DEDTM01'];
     bargeList.innerHTML=skipN+(noSchedDepots.includes(code)?`<div class="no-sched-isr">📋 Schedule not yet available for <strong>${name}</strong>. Please raise an ISR.</div>`:`<div class="no-sched">No departures available for <strong>${code}</strong> within the planning window.</div>`);
   } else {
     deps[0].isRecommended=true;
@@ -1151,7 +1178,7 @@ function expCopyBooking(btn){
 function expClear(){
   document.getElementById('expResult').style.display='none';document.getElementById('expEmpty').style.display='block';
   document.getElementById('expZip').value='';document.getElementById('expTerminal').value='';document.getElementById('expLoadDate').value='';
-  document.getElementById('expCustomsBanner').style.display='none';document.getElementById('expBargeTitle').style.display='none';
+  document.getElementById('expCustomsBanner').style.display='none';document.getElementById('expImoReeferBanner').style.display='none';document.getElementById('expBargeTitle').style.display='none';
   document.getElementById('expBargeList').innerHTML='';
 }
 
