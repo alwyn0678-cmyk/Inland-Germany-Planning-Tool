@@ -243,6 +243,12 @@ table.reft{width:100%;border-collapse:collapse;font-size:12px;}
 .bc-rec-badge{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-family:var(--fm);font-size:10px;font-weight:700;color:var(--grn);background:var(--gb);border:1px solid var(--gbd);padding:2px 8px;border-radius:3px;}
 .bc-cutoff-note{display:flex;align-items:center;gap:5px;margin-top:6px;font-family:var(--fm);font-size:10px;color:var(--blue);background:var(--bl);border:1px solid var(--bm);padding:3px 8px;border-radius:3px;}
 .bc-holiday-warn{display:flex;align-items:flex-start;gap:5px;margin-top:6px;font-family:var(--fm);font-size:10px;color:#7c5400;background:#fff8e1;border:1px solid #f9a825;padding:4px 8px;border-radius:3px;line-height:1.4;}
+.bc-remarks{margin-top:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;color:var(--ink);line-height:1.5;}
+.bc-remarks code{font-family:var(--fm);font-size:11px;color:var(--blue);font-weight:600;}
+.bc-order-dl{display:flex;align-items:center;gap:8px;margin-top:10px;padding:7px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);font-size:12px;}
+.bc-dl-label{font-family:var(--fc);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--mu);}
+.bc-dl-date{font-family:var(--fm);font-size:12px;font-weight:600;color:var(--ink);}
+
 .bc-skipped{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;margin-bottom:8px;background:var(--s3);border:1px solid var(--bd);border-left:4px solid var(--mu);border-radius:var(--r);font-family:var(--fm);font-size:11px;color:var(--mu);line-height:1.5;}
 .bc-win{flex:1;padding:14px 20px;display:flex;flex-direction:column;gap:10px;}
 .bc-win-hdr{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
@@ -905,6 +911,7 @@ function impRun(){
     ti+=`<div class="ti-divider"></div><div class="ti-item"><span style="font-family:var(--fm);font-size:9px;color:var(--mu)">TRUCK:</span><span style="font-size:11px;font-weight:600">${truckList[0]||terms.t}</span></div></div>`;
   }
   document.getElementById('impTermInfo').innerHTML=ti;
+  // Route map
   document.getElementById('impBanners').innerHTML='';
   // Cards
   if(isFuture){
@@ -1135,6 +1142,7 @@ function expSelectDepot(code){
   document.querySelectorAll('#page-export .depot-pill[data-depot]').forEach(p=>p.classList.toggle('selected',p.dataset.depot===code));
   const bargeList=document.getElementById('expBargeList');const bargeTitle=document.getElementById('expBargeTitle');
   const[termCode,yotStr,port]=termVal.split('|');const yot=parseInt(yotStr);const loadingDate=parseDate(loadDate);
+  // Update route map
   const loadTimeStr=document.getElementById('expLoadTime').value||'08:00';
   const{deps,skipped}=expGetNextDeps(code,port,loadingDate,loadTimeStr,2,termCode);
   const name=EXP_DEPOTS[code]||code;
@@ -1157,10 +1165,13 @@ function expSelectDepot(code){
 function expBargeCard(dep,yot,ctx){
   const modIcon=dep.mod==='Rail'?'🚂':'🛳';
   const ccoMin=addDays(dep.eat,dep.buffer||2);const latestETA=addDays(dep.eat,yot-1);
+  const orderDL=prevBizDay(addDays(dep.etd,-7));
+  const odl=dFromNow(orderDL);
   const recBadge=dep.isRecommended?'<div class="bc-rec-badge">✓ Recommended</div>':'';
   const cutoffNote=dep.nextDayCutoff?'<div class="bc-cutoff-note">⏰ Load before 12:00 to make this departure</div>':'';
   const hols=holidaysInRange(dep.etd,dep.eat);
   const holHtml=hols.length?`<div class="bc-holiday-warn">⚠ Public holiday in transit: ${hols.map(h=>fmtS(h)).join(', ')} — verify with depot</div>`:'';
+  const dayN=DN[dep.etd.getDay()];const ds=dep.etd.getDate()+'/'+String(dep.etd.getMonth()+1).padStart(2,'0');
   return`<div class="bc${dep.isRecommended?' bc-recommended':''}">
     <div class="bc-accent ${dep.mod.toLowerCase()}"></div>
     <div class="bc-body">
@@ -1177,10 +1188,12 @@ function expBargeCard(dep,yot,ctx){
           <div class="win-item"><div class="win-item-lbl cco">Earliest Vessel CCO</div><div class="win-item-date cco">${fmtS(ccoMin)}</div><div class="win-item-sub">${ccoMin.getFullYear()}</div></div>
           <div class="win-item"><div class="win-item-lbl etd">Latest Vessel ETA</div><div class="win-item-date etd">${fmtS(latestETA)}</div><div class="win-item-sub">${latestETA.getFullYear()}</div></div>
         </div>
+        <div class="bc-order-dl"><span class="bc-dl-label">Order Deadline</span><span class="bc-dl-date">${fmt(orderDL)}</span> ${urgTag(odl)}</div>
+        <div class="bc-remarks">📝 Remarks: <code>Please plan on ${dep.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>
         <button class="copy-btn" onclick="expCopyBooking(this)"
           data-zip="${ctx.zip}" data-container="${ctx.container}" data-loaddate="${ctx.loadDate}" data-loadtime="${ctx.loadTime}"
-          data-depot="${ctx.depotCode}" data-depotname="${ctx.depotName}" data-modality="${dep.mod}" data-etd="${fmt(dep.etd)}"
-          data-terminal="${ctx.termCode}" data-termname="${ctx.termName}" data-cco="${fmt(ccoMin)}" data-eta="${fmt(latestETA)}">⎘ Copy Booking Summary</button>
+          data-depot="${ctx.depotCode}" data-depotname="${ctx.depotName}" data-modality="${dep.mod}" data-etd="${fmt(dep.etd)}" data-etdshort="${dayN} ${ds}"
+          data-terminal="${ctx.termCode}" data-termname="${ctx.termName}" data-cco="${fmt(ccoMin)}" data-eta="${fmt(latestETA)}" data-orderdl="${fmt(orderDL)}">⎘ Copy Booking Summary</button>
       </div>
     </div>
   </div>`;
@@ -1196,6 +1209,9 @@ function expCopyBooking(btn){
     `Depot               : ${d.depot} — ${d.depotname}`,`Modality            : ${d.modality}`,`Departure (ETD)     : ${d.etd}`,
     '─────────────────────────────────','VESSEL PLANNING WINDOW',
     `Terminal            : ${d.terminal} — ${d.termname}`,`Earliest Vessel CCO : ${d.cco}`,`Latest Vessel ETA   : ${d.eta}`,
+    '─────────────────────────────────',
+    `Order Deadline      : ${d.orderdl}`,
+    `Transport Order Remarks: Please plan on ${d.modality.toLowerCase()} departure with ETD ${d.etdshort}`,
     '─────────────────────────────────',
     `Generated           : ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} · Maersk DE Inland Ops v2.0`,
   ].join('\n');
