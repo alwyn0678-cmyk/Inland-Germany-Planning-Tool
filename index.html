@@ -56,6 +56,13 @@ body{font-family:var(--ff);background:var(--s2);color:var(--ink);min-height:100v
 .spec-tab:hover{color:rgba(255,255,255,.5);background:rgba(255,255,255,.04);}
 .spec-tab.active{color:rgba(255,255,255,.6);background:rgba(255,255,255,.06);}
 
+/* Refresh button in topbar */
+.refresh-btn{display:flex;align-items:center;gap:7px;padding:8px 20px;font-family:var(--fc);font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,#e05a5a,#c0152a);border:none;border-radius:6px;cursor:pointer;transition:all .18s;box-shadow:0 2px 8px rgba(192,21,42,.3);}
+.refresh-btn:hover{background:linear-gradient(135deg,#e87070,#d42040);box-shadow:0 4px 14px rgba(192,21,42,.45);transform:translateY(-1px);}
+.refresh-btn:active{transform:translateY(0);box-shadow:0 1px 4px rgba(192,21,42,.3);}
+.refresh-btn .refresh-icon{font-size:16px;font-weight:700;transition:transform .4s ease;}
+.refresh-btn:hover .refresh-icon{transform:rotate(360deg);}
+
 .page{display:none;flex:1;flex-direction:column;}.page.active{display:flex;}
 
 /* ═══ HERO / FORM ═══ */
@@ -319,7 +326,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
   <span class="wm">Maersk</span>
   <div class="tsep"></div>
   <span class="tmod">inland.ops.de</span>
-  <div class="tr"><span class="ttag" id="todayTag"></span></div>
+  <div class="tr"><button class="refresh-btn" onclick="resetTool()"><span class="refresh-icon">↻</span> New Search</button><span class="ttag" id="todayTag"></span></div>
 </nav>
 
 <!-- ═══ TAB NAV ═══ -->
@@ -645,6 +652,39 @@ function copyText(text,btn,label){
   if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(doCopy).catch(()=>{fbCopy(text);doCopy();});}else{fbCopy(text);doCopy();}
 }
 function fbCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+
+// ══ Reset / New Search ══
+function resetTool(){
+  // Reset Import
+  document.getElementById('impZip').value='';
+  document.getElementById('impSize').value='40';
+  document.getElementById('impType').value='dry';
+  document.getElementById('impPort').value='RTM';
+  document.getElementById('impETDDate').value=new Date().toISOString().slice(0,10);
+  document.getElementById('impETDTime').value='08:00';
+  document.getElementById('impResult').style.display='none';
+  document.getElementById('impEmpty').style.display='block';
+  document.getElementById('impSummary').innerHTML='';
+  document.getElementById('impBanners').innerHTML='';
+  document.getElementById('impTermInfo').innerHTML='';
+  document.getElementById('impCards').innerHTML='';
+  impAll=[];impTerms=null;
+  // Reset Export
+  document.getElementById('expZip').value='';
+  document.getElementById('expSize').value='40';
+  document.getElementById('expType').value='dry';
+  document.getElementById('expLoadDate').value='';
+  document.getElementById('expLoadTime').value='08:00';
+  document.getElementById('expTerminal').value='';
+  document.getElementById('expResult').style.display='none';
+  document.getElementById('expEmpty').style.display='block';
+  document.getElementById('expDepotRack').innerHTML='';
+  document.getElementById('expCustomsBanner').style.display='none';
+  document.getElementById('expBargeTitle').style.display='none';
+  document.getElementById('expBargeList').innerHTML='';
+  // Scroll to top
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
 // ══ Tab switching ══
 function switchTab(t){
