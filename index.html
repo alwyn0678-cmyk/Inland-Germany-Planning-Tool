@@ -707,19 +707,19 @@ function switchTab(t){
 // IMPORT PLANNER - DATA & LOGIC
 // ══════════════════════════════════════════════════════
 const IMP_SCHEDULES=[
-  {t:"Antwerpen",etd:"Wed",loc:"DEMHG02",eta:"Mon",mod:"Barge"},{t:"Antwerpen",etd:"Sat",loc:"DEMHG02",eta:"Thur",mod:"Barge"},{t:"Antwerpen",etd:"Mon",loc:"DEMHG02",eta:"Sat",mod:"Barge"},
-  {t:"Rotterdam",etd:"Thur",loc:"DEMHG02",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEMHG02",eta:"Sat",mod:"Barge"},
+  {t:"Antwerpen",etd:"Wed",loc:"DEMHG02",eta:"Mon",mod:"Barge"},{t:"Antwerpen",etd:"Sat",loc:"DEMHG02",eta:"Thu",mod:"Barge"},{t:"Antwerpen",etd:"Mon",loc:"DEMHG02",eta:"Sat",mod:"Barge"},
+  {t:"Rotterdam",etd:"Thu",loc:"DEMHG02",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEMHG02",eta:"Sat",mod:"Barge"},
   {t:"Antwerpen",etd:"Wed",loc:"DEGRH01",eta:"Mon",mod:"Barge"},{t:"Antwerpen",etd:"Sat",loc:"DEGRH01",eta:"Wed",mod:"Barge"},{t:"Antwerpen",etd:"Mon",loc:"DEGRH01",eta:"Fri",mod:"Barge"},
-  {t:"Rotterdam",etd:"Thur",loc:"DEGRH01",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEGRH01",eta:"Fri",mod:"Barge"},
+  {t:"Rotterdam",etd:"Thu",loc:"DEGRH01",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEGRH01",eta:"Fri",mod:"Barge"},
   {t:"Antwerpen",etd:"Mon",loc:"DEAJHRA",eta:"Fri",mod:"Barge"},{t:"Antwerpen",etd:"Thu",loc:"DEAJHRA",eta:"Mon",mod:"Barge"},
   {t:"Rotterdam",etd:"Mon",loc:"DEAJHRA",eta:"Fri",mod:"Barge"},{t:"Rotterdam",etd:"Thu",loc:"DEAJHRA",eta:"Mon",mod:"Barge"},
   {t:"Antwerpen",etd:"Mon",loc:"DEG4TG",eta:"Fri",mod:"Barge"},{t:"Antwerpen",etd:"Fri",loc:"DEG4TG",eta:"Mon",mod:"Barge"},
-  {t:"Rotterdam",etd:"Mon",loc:"DEG4TG",eta:"Fri",mod:"Barge"},{t:"Rotterdam",etd:"Thur",loc:"DEG4TG",eta:"Mon",mod:"Barge"},
+  {t:"Rotterdam",etd:"Mon",loc:"DEG4TG",eta:"Fri",mod:"Barge"},{t:"Rotterdam",etd:"Thu",loc:"DEG4TG",eta:"Mon",mod:"Barge"},
   {t:"Antwerpen",etd:"Mon",loc:"DEDUI01",eta:"Wed",mod:"Barge"},{t:"Antwerpen",etd:"Fri",loc:"DEDUI01",eta:"Mon",mod:"Barge"},
-  {t:"Rotterdam",etd:"Thur",loc:"DEDUI01",eta:"Mon",mod:"Barge"},{t:"Rotterdam",etd:"Fri",loc:"DEDUI01",eta:"Wed",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEDUI01",eta:"Fri",mod:"Barge"},
+  {t:"Rotterdam",etd:"Thu",loc:"DEDUI01",eta:"Mon",mod:"Barge"},{t:"Rotterdam",etd:"Fri",loc:"DEDUI01",eta:"Wed",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEDUI01",eta:"Fri",mod:"Barge"},
   {t:"Rotterdam",etd:"Wed",loc:"DEDUI01",eta:"Fri",mod:"Rail"},{t:"Rotterdam",etd:"Thu",loc:"DEDUI01",eta:"Mon",mod:"Rail"},
   {t:"Antwerpen",etd:"Mon",loc:"DEBNX01",eta:"Fri",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEBNX01",eta:"Fri",mod:"Barge"},
-  {t:"Antwerpen",etd:"Thur",loc:"DEBNX01",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Thur",loc:"DEBNX01",eta:"Tue",mod:"Barge"},
+  {t:"Antwerpen",etd:"Thu",loc:"DEBNX01",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Thu",loc:"DEBNX01",eta:"Tue",mod:"Barge"},
   {t:"Rotterdam",etd:"Tue",loc:"NUE02",eta:"Thu",mod:"Rail"},{t:"Rotterdam",etd:"Fri",loc:"NUE02",eta:"Sun",mod:"Rail"}
 ];
 
@@ -732,13 +732,21 @@ const IMP_TERM_NAMES={
 const IMP_HAS_SCHED=new Set(['DEDUI01','DEGRH01','DEG4TG','DEBNX01','NUE02','DEMHG02','DEAJHRA']);
 const IMP_CODE_ALIAS={'DE9G4TG':'DEG4TG','DENUE02':'NUE02'};
 const IMP_NO_RAIL=new Set(['DEMNZ01','DEGRH01']);
+const IMP_TRUCK_BY_TERM={
+  'DEDUI01':'HP Duisburg','DEGRH01':'DP World Germersheim','DEMNZ01':'Frankenbach Mainz',
+  'DEG4TG':'Contargo Gustavsburg','DE9G4TG':'Contargo Gustavsburg',
+  'DEBNX01':'AZS Bonn','DENUE02':'HPE Nuernberg','NUE02':'HPE Nuernberg',
+  'DEMHG02':'DPW Mannheim','DEAJHRA':'Rheinhafen Andernach','DETREAZ':'AZS Trier',
+  'DEDTM01':'CTD Dortmund','DELJZU1':'Hub Trucker Leipzig','DEMUNU1':'DUSS Muenchen',
+};
+function impTruckForTerm(loc){return IMP_TRUCK_BY_TERM[loc]||IMP_TRUCK_BY_TERM[impScCode(loc)]||impTerms?.t||'—';}
 
 const IMP_ZIP={
 RTM:{
 '0':{b:'DELJZU1',r:'DELJZU1',t:'Hub Trucker'},'1':{b:'DELJZU1',r:'DELJZU1',t:'Hub Trucker'},
 '31':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},'32':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '33':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'34':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
-'35':{b:'DEMNZ01',r:null,t:'Frankenbach'},'36':{b:'DEMNZ01',r:null,t:'Frankenbach'},
+'35':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},'36':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},
 '37':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},'38':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},
 '39':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},'40':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '41':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'42':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
@@ -748,11 +756,11 @@ RTM:{
 '49':{b:'DEDUI01',r:'DEDTM01',t:'HP Duisburg'},'50':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '51':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'52':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '53':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'54':{b:'DETREAZ',r:'DETREAZ',t:'AZS Trier'},
-'55':{b:'DEMNZ01',r:null,t:'Frankenbach / Gustavsburg'},'56':{b:'DEBNX01',r:null,t:'AZS Bonn'},
+'55':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},'56':{b:'DEBNX01',r:null,t:'AZS Bonn'},
 '57':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'58':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
-'59':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'60':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},
-'61':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},'63':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},
-'64':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},'65':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},
+'59':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'60':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},
+'61':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},'62':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},'63':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},
+'64':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},'65':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},
 '66':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'67':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
 '68':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'69':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
 '70':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'71':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
@@ -787,7 +795,7 @@ ANR:{
 '56':{b:'DEBNX01',r:'DEBNX01',t:'AZS Bonn'},'57':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '58':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'59':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '60':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},'61':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
-'63':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},'64':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
+'62':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},'63':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},'64':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
 '65':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
 '66':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'67':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
 '68':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'69':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
@@ -886,7 +894,16 @@ function impRun(){
   if(terms.r&&impScCode(terms.r)!==impScCode(terms.b||'')&&!IMP_NO_RAIL.has(impScCode(terms.r))){
     ti+=`<div class="ti-divider"></div><div class="ti-item"><span class="ti-mode ti-rail">Rail</span><span class="ti-name">${impTName(terms.r)}</span><span class="ti-code">${terms.r}</span>${!impHasSc(terms.r)?'<span class="ti-no-sched">No schedule yet</span>':''}</div>`;
   }
-  ti+=`<div class="ti-divider"></div><div class="ti-item"><span style="font-family:var(--fm);font-size:9px;color:var(--mu)">TRUCK:</span><span style="font-size:11px;font-weight:600">${terms.t}</span></div></div>`;
+  // Show truck per terminal
+  const truckSet=new Set();
+  if(terms.b)truckSet.add(impTruckForTerm(terms.b));
+  if(terms.r&&!IMP_NO_RAIL.has(impScCode(terms.r)))truckSet.add(impTruckForTerm(terms.r));
+  const truckList=[...truckSet];
+  if(truckList.length>1){
+    ti+=`<div class="ti-divider"></div><div class="ti-item"><span style="font-family:var(--fm);font-size:9px;color:var(--mu)">TRUCK:</span><span style="font-size:11px;font-weight:600">${truckList.join(' / ')}</span></div></div>`;
+  } else {
+    ti+=`<div class="ti-divider"></div><div class="ti-item"><span style="font-family:var(--fm);font-size:9px;color:var(--mu)">TRUCK:</span><span style="font-size:11px;font-weight:600">${truckList[0]||terms.t}</span></div></div>`;
+  }
   document.getElementById('impTermInfo').innerHTML=ti;
   document.getElementById('impBanners').innerHTML='';
   // Cards
@@ -925,7 +942,7 @@ function impRenderCards(scheds,isISR){
       </div>
       ${isISR?`<div class="imp-card-note isr-note">📋 TO deadline passed — raise ISR to check availability on this ${s.mod.toLowerCase()}</div>`
         :`<div class="imp-card-note transport-note">📝 Remarks: <code>Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>`}
-      <div class="imp-card-footer"><span class="imp-card-vendor">Truck: ${impTerms.t}</span><div class="imp-card-btns">
+      <div class="imp-card-footer"><span class="imp-card-vendor">Truck: ${impTruckForTerm(s.loc)}</span><div class="imp-card-btns">
         ${isISR?`<button class="copy-btn" onclick="impCopyISR(${i},this)">📧 Copy ISR</button>`:''}
         <button class="copy-btn" onclick="impCopySummary(${i},${isISR},this)">⎘ Copy Summary</button>
       </div></div></div>`;
@@ -936,12 +953,12 @@ function impRenderCards(scheds,isISR){
 function impCopySummary(idx,isISR,btn){
   let list;
   if(impIsFuture){list=isISR?impAll.filter(i=>!i.plan).slice(0,2):impAll.filter(i=>i.plan).slice(0,3);}
-  else{const pl=impAll.filter(i=>i.plan);list=pl.length>1?pl.slice(1,4):pl.slice(0,3);}
+  else{const pl=impAll.filter(i=>i.plan);list=pl.slice(0,3);}
   const s=list[idx];if(!s)return;const pn=impPort==='RTM'?'Rotterdam':'Antwerp';
   const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
   let t=`IMPORT INLAND PLAN\nStatus: ${isISR?'ISR REQUIRED':'PLANNABLE'}${s.rec?' - RECOMMENDED':''}\nPort: ${pn}\nTerminal: ${impTName(s.loc)} (${s.loc})\nMode: ${s.mod} (${s.etdDay} schedule)\nTerminal ETD: ${fmt(s.etd)}\nDepot Arrival: ${fmt(s.eta)}\nCustomer Delivery: ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\nOrder Deadline: ${fmt(s.orderDL)}\n`;
   if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline: ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
-  t+=`Truck Vendor: ${impTerms.t}\n`;
+  t+=`Truck Vendor: ${impTruckForTerm(s.loc)}\n`;
   if(isISR)t+=`\nAction: Raise ISR to check availability on this ${s.mod.toLowerCase()}\n`;
   else t+=`\nTransport Order Remarks: Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}\n`;
   copyText(t,btn,'⎘ Copy Summary');
@@ -998,11 +1015,11 @@ const EXP_SCHED={
   'DEMHG02':{RTM:[{mod:'Barge',dep:1,transit:4,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}],ANR:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:4,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
   'DEMNZ01':{RTM:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}]},
   // Nürnberg Rail Export — RTM only, terminal-filtered from Hutchison Ports schedule
-  // NR11: Mon dep → Cargo available Tue/Wed → transit 1d → ECT EMX (NLROT21), APMT-2 (NLROTTM)
-  // NR31: Wed dep → Cargo available Thu → transit 1d → RWG (NLROTWG), APMT-2 (NLROTTM), HP Delta II (NLROT01)
-  // NR41: Thu dep → Cargo available Fri/Sat → transit 1d → HP Delta II (NLROT01), ECT EMX (NLROT21), APMT-2 (NLROTTM)
-  // NR51: Fri dep → Cargo available Sat → transit 1d → HP Delta II (NLROT01), APMT-2 (NLROTTM), RWG (NLROTWG)
-  // NR61: Sat dep → Cargo available Mon → transit 2d → HP Delta II (NLROT01), APMT-2 (NLROTTM)
+  // NR11: Mon dep → transit 1d → Cargo Tue/Wed at ECT EMX (NLROT21), APMT-2 (NLROTTM), HP Delta II (NLROT01)
+  // NR31: Wed dep → transit 1d → Cargo Thu at RWG (NLROTWG), APMT-2 (NLROTTM), HP Delta II (NLROT01)
+  // NR41: Thu dep → transit 1d → Cargo Fri/Sat at HP Delta II (NLROT01), ECT EMX (NLROT21), APMT-2 (NLROTTM)
+  // NR51: Fri dep → transit 1d → Cargo Sat at HP Delta II (NLROT01), APMT-2 (NLROTTM), RWG (NLROTWG), ECT EMX (NLROT21)
+  // NR61: Sat dep → transit 2d → Cargo Mon at HP Delta II (NLROT01), APMT-2 (NLROTTM)
   'DENUE02':{RTM:[
     {mod:'Rail',dep:1,transit:1,buffer:2,terms:['NLROT21','NLROTTM','NLROT01']},
     {mod:'Rail',dep:3,transit:1,buffer:2,terms:['NLROTWG','NLROTTM','NLROT01']},
@@ -1197,7 +1214,7 @@ function buildExpRef(){
   const rows=EXP_RULES.map(r=>{
     const p2=r.rtm.p2?`<span style="color:var(--amb)">${r.rtm.p2}</span>`:nil;
     const p3=r.rtm.p3?`<span style="color:var(--red)">${r.rtm.p3}</span>${r.isrOnP3?'<span class="dp-isr" style="margin-left:3px">ISR</span>':''}`:nil;
-    return`<tr><td style="font-family:var(--fm)">${r.zipLabel}</td><td style="color:var(--grn);font-weight:600">${r.rtm.p1}</td><td>${p2}</td><td>${p3}</td><td style="color:var(--grn);font-weight:600">${r.anr&&r.anr.p1?r.anr.p1:r.rtm.p1}</td></tr>`;
+    return`<tr><td style="font-family:var(--fm)">${r.zipLabel}</td><td style="color:var(--grn);font-weight:600">${r.rtm.p1}</td><td>${p2}</td><td>${p3}</td><td style="color:var(--grn);font-weight:600">${r.anr&&r.anr.p1?r.anr.p1:nil}</td></tr>`;
   }).join('');
   tbl.innerHTML=head+`<tbody>${rows}</tbody>`;
   document.getElementById('expRuleCount').textContent=`${EXP_RULES.length} rules`;
