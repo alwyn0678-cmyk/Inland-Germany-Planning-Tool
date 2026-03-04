@@ -1105,10 +1105,20 @@ function expRun(){
   if(opts.p2)dp+=pill(opts.p2,2,false,false,'');
   if(opts.p3)dp+=pill(opts.p3,3,rule.isrOnP3,false,'');
   document.getElementById('expDepotRack').innerHTML=dp;
-  // IMO/Reefer ISR warning for Duisburg
+  // IMO/Reefer ISR warning for Duisburg — block all schedules
   const isDuisburg=opts.p1==='DEDUI01';
   const isImoReefer=(type==='reefer'||type==='imo');
   document.getElementById('expImoReeferBanner').style.display=(isDuisburg&&isImoReefer)?'flex':'none';
+  if(isDuisburg&&isImoReefer){
+    document.getElementById('expDepotRack').innerHTML='';
+    document.getElementById('expBargeTitle').style.display='none';
+    document.getElementById('expBargeList').innerHTML=`<div style="margin:32px 0;padding:32px 24px;background:var(--rb);border:2px solid var(--red);border-radius:10px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">🚨</div>
+      <div style="font-family:var(--fc);font-size:28px;font-weight:800;color:var(--red);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">ISR Required</div>
+      <div style="font-size:14px;color:var(--ink);line-height:1.6;max-width:480px;margin:0 auto">IMO and Reefer containers via <strong>Duisburg (DEDUI01)</strong> are on request only.<br>CX must raise an ISR before any booking can be made.</div>
+    </div>`;
+    return;
+  }
   // Customs deadline
   const[lh2,lm2]=loadTime.split(':').map(Number);
   const deadlineDate=new Date(loadingDate);deadlineDate.setHours(lh2,lm2+180,0,0);
