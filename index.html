@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maersk DE — Inland Planning Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e1117;--ink2:#1c2230;--ink3:#2a3347;
+  --s:#fff;--s2:#f7f8fa;--s3:#eef0f4;
+  --mu:#8893a6;--bd:#dde1ea;
+  --blue:#0063a5;--bl:#e8f2fb;--bm:#cce0f5;
+  --grn:#0e7a4a;--gb:#e8f7f0;--gbd:#a3d9be;
+  --amb:#b45309;--ab:#fef3e2;--abd:#f6c878;
+  --red:#c0152a;--rb:#fdeef0;--rbd:#f4a8b0;
+  --purple:#6b21a8;--pb:#f3e8ff;--pbd:#c4b5fd;
+  --ff:'Barlow',sans-serif;--fc:'Barlow Condensed',sans-serif;--fm:'JetBrains Mono',monospace;
+  --r:8px;--rs:5px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--ff);background:var(--s2);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+
+/* ═══ TOPBAR ═══ */
+.top{background:var(--ink);height:48px;display:flex;align-items:center;padding:0 24px;flex-shrink:0;position:sticky;top:0;z-index:200;}
+.wm{font-family:var(--fc);font-size:20px;font-weight:700;letter-spacing:.12em;color:#fff;text-transform:uppercase;}
+.tsep{width:1px;height:20px;background:rgba(255,255,255,.15);margin:0 16px;}
+.tmod{font-family:var(--fm);font-size:11px;color:rgba(255,255,255,.4);}
+.tr{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.ttag{font-family:var(--fm);font-size:10px;padding:3px 8px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);}
+
+/* ═══ TAB NAV ═══ */
+.tnav{background:var(--ink2);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:stretch;padding:0 24px;position:sticky;top:48px;z-index:199;}
+.tnav-main{display:flex;gap:4px;padding:6px 0;}
+.tnav-secondary{margin-left:auto;display:flex;align-items:center;}
+
+/* Big direction tabs */
+.dir-tab{display:flex;align-items:center;gap:10px;padding:10px 28px;font-family:var(--fc);font-size:17px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:2px solid transparent;border-radius:8px 8px 0 0;background:none;cursor:pointer;transition:all .18s;white-space:nowrap;position:relative;color:rgba(255,255,255,.35);}
+.dir-tab:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.04);}
+.dir-tab .dir-icon{font-size:20px;line-height:1;}
+.dir-tab .dir-label{line-height:1.1;}
+.dir-tab .dir-sub{font-family:var(--fm);font-size:9px;font-weight:400;letter-spacing:.1em;opacity:.5;display:block;margin-top:1px;}
+.dir-tab .tbdg{font-family:var(--fm);font-size:9px;padding:2px 7px;background:rgba(255,255,255,.08);border-radius:3px;color:rgba(255,255,255,.3);align-self:flex-start;margin-top:2px;}
+
+/* Active states per direction */
+.dir-tab.active{color:#fff;background:rgba(255,255,255,.06);}
+.dir-tab.tab-import.active{border-color:#5ba8e0;border-bottom-color:var(--ink2);box-shadow:inset 0 2px 0 #5ba8e0;}
+.dir-tab.tab-import.active .dir-icon,.dir-tab.tab-import.active .dir-label{color:#5ba8e0;}
+.dir-tab.tab-import.active .tbdg{background:rgba(91,168,224,.2);color:#5ba8e0;}
+.dir-tab.tab-export.active{border-color:#a3d9be;border-bottom-color:var(--ink2);box-shadow:inset 0 2px 0 #a3d9be;}
+.dir-tab.tab-export.active .dir-icon,.dir-tab.tab-export.active .dir-label{color:#a3d9be;}
+.dir-tab.tab-export.active .tbdg{background:rgba(163,217,190,.2);color:#a3d9be;}
+
+/* Small spec tab */
+.spec-tab{display:flex;align-items:center;gap:5px;padding:0 14px;height:34px;font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.25);border:none;background:none;cursor:pointer;transition:all .15s;white-space:nowrap;border-radius:4px;}
+.spec-tab:hover{color:rgba(255,255,255,.5);background:rgba(255,255,255,.04);}
+.spec-tab.active{color:rgba(255,255,255,.6);background:rgba(255,255,255,.06);}
+
+.page{display:none;flex:1;flex-direction:column;}.page.active{display:flex;}
+
+/* ═══ HERO / FORM ═══ */
+.hero{padding:28px 24px 24px;position:relative;overflow:hidden;flex-shrink:0;}
+.hero-import{background:var(--ink2);}
+.hero-import::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(91,168,224,.02) 0,rgba(91,168,224,.02) 1px,transparent 1px,transparent 60px);pointer-events:none;}
+.hero-export{background:var(--ink2);}
+.hero-export::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(163,217,190,.02) 0,rgba(163,217,190,.02) 1px,transparent 1px,transparent 60px);pointer-events:none;}
+.hi{max-width:960px;margin:0 auto;position:relative;z-index:1;}
+.hey{font-family:var(--fc);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px;}
+.htl{font-family:var(--fc);font-size:24px;font-weight:700;color:#fff;letter-spacing:.02em;margin-bottom:18px;line-height:1.15;}
+.htl .hl-imp{color:#5ba8e0;} .htl .hl-exp{color:#a3d9be;}
+.form-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fgl{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;}
+.fgi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--rs);padding:9px 12px;font-family:var(--fm);font-size:13px;color:#fff;outline:none;color-scheme:dark;transition:border-color .15s;width:100%;}
+.fgi:focus{border-color:rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(91,168,224,.15);}
+.fgi::placeholder{color:rgba(255,255,255,.2);}
+.fgi option,.fgi optgroup{background:#1c2230;}
+.fg-zip .fgi{font-size:20px;font-weight:600;letter-spacing:.08em;width:120px;}
+.fg-cnt{display:flex;gap:6px;} .fg-cnt .fgi{width:auto;}
+.fg-dt{display:flex;gap:6px;} .fg-dt .fgi{width:auto;}
+.gobtn{border:none;border-radius:var(--rs);padding:0 32px;height:42px;font-family:var(--fc);font-size:16px;font-weight:700;letter-spacing:.08em;color:#fff;cursor:pointer;transition:background .15s;text-transform:uppercase;white-space:nowrap;align-self:flex-end;flex-shrink:0;}
+.gobtn-imp{background:var(--blue);} .gobtn-imp:hover{background:#0055a0;}
+.gobtn-exp{background:var(--grn);} .gobtn-exp:hover{background:#0a6a3e;}
+
+/* ═══ CONTENT AREA ═══ */
+.scont{flex:1;max-width:960px;width:100%;margin:0 auto;padding:24px 24px 48px;}
+
+/* Empty state */
+.empty-state{text-align:center;padding:50px 0;color:var(--mu);}
+.empty-state .ei{font-size:40px;margin-bottom:14px;opacity:.3;}
+.empty-state .em{font-size:14px;color:var(--mu);max-width:400px;margin:0 auto;line-height:1.6;}
+
+/* ═══ SHARED: Context bar ═══ */
+.ctx-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:10px 14px;background:var(--s);border:1px solid var(--bd);border-radius:var(--r);flex-wrap:wrap;}
+.ctx-item{display:flex;align-items:center;gap:5px;}
+.ctx-lbl{font-family:var(--fm);font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.1em;}
+.ctx-val{font-family:var(--fm);font-size:12px;font-weight:600;color:var(--ink3);}
+.ctx-sep{color:var(--bd);font-size:14px;}
+.ctx-terminal{font-family:var(--fm);font-size:12px;font-weight:700;color:var(--blue);background:var(--bl);padding:2px 8px;border-radius:3px;border:1px solid var(--bm);}
+.ctx-yot{font-family:var(--fm);font-size:11px;color:var(--grn);font-weight:600;}
+.rcl{margin-left:auto;font-family:var(--fm);font-size:11px;color:var(--mu);cursor:pointer;background:none;border:1px solid var(--bd);padding:4px 10px;border-radius:var(--rs);transition:all .12s;}
+.rcl:hover{color:var(--red);border-color:var(--rbd);}
+
+/* ═══ SHARED: Section headers ═══ */
+.section-ttl{font-family:var(--fc);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);margin-bottom:12px;}
+
+/* ═══ SHARED: Banners ═══ */
+.banner-card{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;margin-bottom:16px;border-radius:var(--r);border-left:5px solid;}
+.banner-card.info{background:var(--bl);border-color:var(--blue);}
+.banner-card.warn{background:#fff8e1;border-color:#f9a825;}
+.banner-card.danger{background:var(--rb);border-color:var(--red);}
+.banner-card.success{background:var(--gb);border-color:var(--grn);}
+.banner-icon{font-size:20px;flex-shrink:0;line-height:1.2;}
+.banner-body{flex:1;}
+.banner-ttl{font-family:var(--fc);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.banner-card.warn .banner-ttl{color:#7c5400;}
+.banner-card.danger .banner-ttl{color:var(--red);}
+.banner-card.success .banner-ttl{color:var(--grn);}
+.banner-card.info .banner-ttl{color:var(--blue);}
+.banner-val{font-family:var(--fc);font-size:22px;font-weight:700;line-height:1.1;}
+.banner-card.warn .banner-val{color:#7c5400;}
+.banner-sub{font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:3px;}
+
+/* ═══ SHARED: Copy button ═══ */
+.copy-btn{font-family:var(--fm);font-size:11px;padding:5px 14px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);color:var(--ink3);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.copy-btn:hover{background:var(--bl);border-color:var(--blue);color:var(--blue);}
+.copy-btn.copied{background:var(--gb);border-color:var(--gbd);color:var(--grn);}
+
+/* ═══ SHARED: No-results ═══ */
+.no-sched{padding:24px;text-align:center;background:var(--s3);border:1px solid var(--bd);border-radius:var(--r);font-family:var(--fm);font-size:12px;color:var(--mu);}
+.no-sched-isr{padding:20px 24px;background:#fff8e1;border:1px solid #f9a825;border-left:4px solid #f9a825;border-radius:var(--r);font-size:13px;color:#7c5400;line-height:1.7;}
+
+/* ═══ SHARED: Ref table ═══ */
+.refsec{margin-top:32px;}
+.reftog{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--s);border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;user-select:none;transition:background .12s;}
+.reftog:hover{background:var(--s3);}
+.reftl{font-family:var(--fc);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--mu);}
+.refbdg{font-family:var(--fm);font-size:10px;padding:2px 7px;background:var(--s3);border:1px solid var(--bd);color:var(--mu);border-radius:3px;margin-left:10px;}
+.refc{font-size:11px;color:var(--mu);transition:transform .2s;}
+.refc.open{transform:rotate(180deg);}
+.refw{border:1px solid var(--bd);border-top:none;border-radius:0 0 var(--r) var(--r);overflow-x:auto;display:none;}
+.refw.open{display:block;}
+table.reft{width:100%;border-collapse:collapse;font-size:12px;}
+.reft th{font-family:var(--fm);font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);padding:7px 11px;border-bottom:1px solid var(--bd);background:var(--s2);text-align:left;white-space:nowrap;}
+.reft td{padding:8px 11px;border-bottom:1px solid rgba(221,225,234,.6);vertical-align:middle;font-size:11px;}
+.reft tr:last-child td{border-bottom:none;}
+.reft tbody tr:hover td{background:var(--s2);}
+.reft .no-sched-cell{color:var(--red);font-style:italic;}
+
+/* ═══════════════════════════════════
+   IMPORT-SPECIFIC STYLES
+   ═══════════════════════════════════ */
+.imp-summary-bar{display:flex;align-items:center;gap:16px;padding:10px 14px;background:var(--s);border:1px solid var(--bd);border-radius:var(--r);flex-wrap:wrap;margin-bottom:14px;}
+.imp-summary-item{display:flex;flex-direction:column;}
+.imp-summary-item .s-label{font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);font-weight:500;}
+.imp-summary-item .s-value{font-family:var(--fm);font-size:12px;font-weight:600;}
+.imp-summary-divider{width:1px;height:28px;background:var(--bd);}
+.booking-type-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px;}
+.booking-future{background:var(--bl);color:#1565C0;}.booking-past{background:var(--ab);color:#E65100;}
+
+.imp-terminal-info{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+.ti-item{display:flex;align-items:center;gap:8px;}
+.ti-mode{font-family:var(--fm);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:4px;}
+.ti-barge{background:var(--bl);color:#1565C0;}.ti-rail{background:var(--pb);color:var(--purple);}
+.ti-name{font-size:12px;font-weight:600;}.ti-code{font-family:var(--fm);font-size:10px;color:var(--mu);}
+.ti-no-sched{font-family:var(--fm);font-size:10px;color:var(--red);font-weight:500;}
+.ti-divider{width:1px;height:24px;background:var(--bd);}
+
+.imp-section-header{font-family:var(--fc);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--bd);display:flex;align-items:center;gap:8px;}
+.imp-section-header.plannable{color:var(--grn);border-color:var(--grn);}
+.imp-section-header.isr-needed{color:var(--amb);border-color:var(--amb);}
+.imp-section-count{font-family:var(--fm);font-size:10px;font-weight:600;padding:1px 7px;border-radius:8px;color:#fff;}
+.imp-section-header.plannable .imp-section-count{background:var(--grn);}
+.imp-section-header.isr-needed .imp-section-count{background:var(--amb);}
+
+/* Import schedule cards */
+.imp-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-bottom:8px;}
+.imp-card{background:var(--s);border-radius:var(--r);border:1px solid var(--bd);overflow:hidden;transition:box-shadow .2s,transform .15s;}
+.imp-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:translateY(-2px);}
+.imp-card.isr-card{border-color:var(--abd);background:#fffdf5;}
+.imp-card-header{padding:10px 16px;border-bottom:1px solid var(--bd);background:var(--s2);}
+.imp-card.isr-card .imp-card-header{background:var(--ab);}
+.imp-card-htop{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.imp-card-hleft{display:flex;align-items:center;gap:8px;min-width:0;}
+.imp-card-depot{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.imp-card-code{font-family:var(--fm);font-size:10px;color:var(--mu);flex-shrink:0;}
+.imp-card-hmeta{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.imp-mode-badge{padding:3px 9px;border-radius:4px;font-family:var(--fm);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
+.imp-mode-barge{background:var(--bl);color:#1565C0;}.imp-mode-rail{background:var(--pb);color:var(--purple);}
+.imp-transit-badge{font-family:var(--fm);font-size:10px;color:var(--mu);font-weight:500;background:var(--s3);padding:2px 7px;border-radius:3px;}
+.imp-rec-badge{font-family:var(--fm);font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;background:var(--gb);color:var(--grn);text-transform:uppercase;letter-spacing:.3px;}
+.imp-status-badge{font-family:var(--fm);font-size:9px;font-weight:700;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.4px;}
+.imp-status-plannable{background:var(--gb);color:var(--grn);}.imp-status-isr{background:var(--ab);color:#B8860B;}
+.imp-card-body{padding:14px 16px;}
+.imp-card-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(238,240,244,.8);}
+.imp-card-row:last-child{border-bottom:none;}
+.imp-card-label{font-family:var(--fm);font-size:10px;color:var(--mu);font-weight:500;text-transform:uppercase;letter-spacing:.04em;}
+.imp-card-value{font-family:var(--fm);font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.urgency-tag{font-family:var(--fm);font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.3px;}
+.urgency-green{background:var(--gb);color:var(--grn);}.urgency-amber{background:var(--ab);color:#B8860B;}.urgency-red{background:var(--rb);color:var(--red);}
+.imp-card-note{margin:0 16px 8px;padding:6px 10px;border-radius:4px;font-family:var(--fm);font-size:11px;font-weight:500;}
+.imp-card-note.isr-note{background:var(--ab);border:1px solid var(--abd);color:#7A5D00;}
+.imp-card-note.transport-note{background:var(--gb);border:1px solid var(--gbd);color:#2E7D32;}
+.imp-card-note code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;font-family:var(--fm);font-size:11px;font-weight:600;}
+.imp-card-footer{padding:8px 16px;background:var(--s2);border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
+.imp-card.isr-card .imp-card-footer{background:var(--ab);}
+.imp-card-vendor{font-family:var(--fm);font-size:10px;color:var(--mu);font-weight:500;}
+.imp-card-btns{display:flex;gap:6px;}
+
+/* ═══════════════════════════════════
+   EXPORT-SPECIFIC STYLES
+   ═══════════════════════════════════ */
+.depot-rack{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.depot-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--s);border:1px solid var(--bd);border-radius:50px;flex-shrink:0;cursor:pointer;transition:all .15s;user-select:none;}
+.depot-pill:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);transform:translateY(-1px);}
+.depot-pill.rank1{border-color:var(--gbd);background:var(--gb);}
+.depot-pill.rank2{border-color:var(--abd);background:var(--ab);}
+.depot-pill.rank3{border-color:var(--rbd);background:var(--rb);}
+.depot-pill.selected{box-shadow:0 0 0 3px var(--blue);border-color:var(--blue)!important;background:var(--bl)!important;}
+.dp-num{font-family:var(--fm);font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.dp-n1{background:var(--grn);color:#fff;}.dp-n2{background:var(--amb);color:#fff;}.dp-n3{background:var(--red);color:#fff;}
+.dp-code{font-family:var(--fm);font-size:12px;font-weight:700;}.dp-name{font-size:12px;color:var(--mu);}
+.dp-isr{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--red);background:var(--rb);padding:1px 6px;border-radius:3px;border:1px solid var(--rbd);}
+.depot-pill.rank2 .dp-name,.depot-pill.rank3 .dp-name{display:none;}
+
+/* Export barge cards */
+.barge-list{display:flex;flex-direction:column;gap:10px;}
+.bc{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;display:flex;align-items:stretch;}
+.bc-accent{width:5px;flex-shrink:0;}
+.bc-accent.barge{background:#1a56a0;}.bc-accent.rail{background:var(--grn);}
+.bc-body{flex:1;display:flex;align-items:center;gap:0;flex-wrap:wrap;}
+.bc-dep{padding:16px 20px;min-width:180px;border-right:1px solid var(--bd);}
+.bc-dep-tag{font-family:var(--fm);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);margin-bottom:4px;}
+.bc-dep-date{font-family:var(--fc);font-size:22px;font-weight:700;line-height:1.1;}
+.bc-dep-year{font-family:var(--fm);font-size:11px;color:var(--mu);margin-top:1px;}
+.bc-rec-badge{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-family:var(--fm);font-size:10px;font-weight:700;color:var(--grn);background:var(--gb);border:1px solid var(--gbd);padding:2px 8px;border-radius:3px;}
+.bc-cutoff-note{display:flex;align-items:center;gap:5px;margin-top:6px;font-family:var(--fm);font-size:10px;color:var(--blue);background:var(--bl);border:1px solid var(--bm);padding:3px 8px;border-radius:3px;}
+.bc-holiday-warn{display:flex;align-items:flex-start;gap:5px;margin-top:6px;font-family:var(--fm);font-size:10px;color:#7c5400;background:#fff8e1;border:1px solid #f9a825;padding:4px 8px;border-radius:3px;line-height:1.4;}
+.bc-skipped{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;margin-bottom:8px;background:var(--s3);border:1px solid var(--bd);border-left:4px solid var(--mu);border-radius:var(--r);font-family:var(--fm);font-size:11px;color:var(--mu);line-height:1.5;}
+.bc-win{flex:1;padding:14px 20px;display:flex;flex-direction:column;gap:10px;}
+.bc-win-hdr{font-family:var(--fc);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.bc-win-ttl{font-family:var(--fm);font-size:10px;color:var(--mu);margin-bottom:8px;}
+.bc-win-rows{display:flex;gap:12px;flex-wrap:wrap;}
+.win-item{flex:1;min-width:160px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 14px;}
+.win-item-lbl{font-family:var(--fm);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+.win-item-lbl.cco{color:var(--blue);}.win-item-lbl.etd{color:var(--grn);}
+.win-item-date{font-family:var(--fc);font-size:20px;font-weight:700;line-height:1.1;}
+.win-item-date.cco{color:var(--blue);}.win-item-date.etd{color:var(--grn);}
+.win-item-sub{font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:3px;}
+.bc-recommended{border-color:var(--gbd);}
+.deduirr-banner{display:flex;align-items:center;gap:10px;padding:11px 16px;margin-bottom:16px;background:var(--rb);border:1px solid var(--rbd);border-left:5px solid var(--red);border-radius:var(--r);font-family:var(--fc);font-size:15px;font-weight:700;color:var(--red);letter-spacing:.02em;}
+
+/* ═══ PRD TAB ═══ */
+.prdlyt{display:grid;grid-template-columns:200px 1fr;gap:0;flex:1;max-width:1060px;width:100%;margin:0 auto;padding:26px 24px 60px;align-items:start;}
+.prdsb{position:sticky;top:100px;padding-right:20px;}
+.sbttl{font-family:var(--fm);font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--bd);}
+.snav{display:block;font-family:var(--fm);font-size:11px;color:var(--mu);padding:4px 7px;border-radius:4px;text-decoration:none;transition:all .12s;border-left:2px solid transparent;line-height:1.3;margin-bottom:1px;}
+.snav:hover{color:var(--ink);background:var(--s3);}
+.snav.active{color:var(--blue);border-left-color:var(--blue);background:var(--bl);}
+.smeta{margin-top:16px;padding:10px;background:var(--s);border:1px solid var(--bd);border-radius:var(--r);}
+.smr{display:flex;justify-content:space-between;font-family:var(--fm);font-size:10px;margin-bottom:4px;}.smr:last-child{margin-bottom:0;}
+.sml{color:var(--mu);}.smv{color:var(--ink);font-weight:500;}.smst{color:var(--amb);font-weight:600;}
+.prdcnt{min-width:0;}
+.prddtl{font-family:var(--fc);font-size:21px;font-weight:700;}
+.prddst{font-size:12px;color:var(--mu);font-family:var(--fm);margin-top:2px;}
+.expbtn{font-family:var(--fm);font-size:11px;color:var(--blue);background:none;border:1px solid var(--bm);padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .12s;white-space:nowrap;margin-top:3px;}
+.expbtn:hover{background:var(--bl);}
+.psec{margin-bottom:7px;border:1px solid var(--bd);border-radius:var(--r);background:var(--s);overflow:hidden;}
+.psh{display:flex;align-items:center;gap:11px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s;border-bottom:1px solid transparent;}
+.psh:hover{background:var(--s2);}
+.psec.open .psh{border-bottom-color:var(--bd);background:var(--s2);}
+.psn{font-family:var(--fm);font-size:10px;font-weight:600;color:var(--blue);background:var(--bl);padding:2px 7px;border-radius:3px;flex-shrink:0;}
+.pst{font-family:var(--fc);font-size:15px;font-weight:700;letter-spacing:.03em;flex:1;}
+.psc{font-size:11px;color:var(--mu);transition:transform .2s;flex-shrink:0;}
+.psec.open .psc{transform:rotate(180deg);}
+.pbdy{padding:18px 20px 22px;display:none;font-size:13px;line-height:1.65;color:var(--ink3);}
+.psec.open .pbdy{display:block;}
+.pbdy h3{font-family:var(--fc);font-size:14px;font-weight:700;margin:16px 0 6px;letter-spacing:.02em;}.pbdy h3:first-child{margin-top:0;}
+.pbdy p{margin-bottom:10px;}.pbdy ul{margin:0 0 10px;padding-left:18px;}.pbdy li{margin-bottom:4px;font-size:13px;}.pbdy strong{font-weight:600;color:var(--ink);}
+.ptw{overflow-x:auto;margin:10px 0;}
+table.pt{width:100%;border-collapse:collapse;font-size:12px;}
+.pt th{font-family:var(--fm);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#fff;background:var(--ink);padding:7px 11px;text-align:left;white-space:nowrap;}
+.pt td{padding:7px 11px;border-bottom:1px solid rgba(221,225,234,.7);vertical-align:top;font-size:12px;}
+.pt tr:last-child td{border-bottom:none;}.pt tr:nth-child(even) td{background:var(--s2);}
+.cid{font-family:var(--fm);font-size:11px;font-weight:600;color:var(--blue);white-space:nowrap;}
+.cg{color:var(--grn);font-weight:600;}.ca{color:var(--amb);font-weight:600;}.cr{color:var(--red);font-weight:600;}
+.ib{padding:12px 14px;border-radius:var(--r);margin:10px 0;border-left:4px solid;}
+.ib.blue{background:var(--bl);border-color:var(--blue);}.ib.green{background:var(--gb);border-color:var(--grn);}.ib.amber{background:var(--ab);border-color:var(--amb);}.ib.red{background:var(--rb);border-color:var(--red);}
+.ibt{font-family:var(--fc);font-size:12px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.ib.blue .ibt{color:var(--blue);}.ib.green .ibt{color:var(--grn);}.ib.amber .ibt{color:var(--amb);}.ib.red .ibt{color:var(--red);}
+.ib p{font-size:12px;margin:0;line-height:1.6;}
+.crow{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid rgba(221,225,234,.5);}.crow:last-child{border-bottom:none;}
+.cpill{font-family:var(--fm);font-size:9px;font-weight:700;padding:3px 7px;border-radius:3px;flex-shrink:0;min-width:40px;text-align:center;}
+.ph{background:var(--rb);color:var(--red);}.ps{background:var(--ab);color:var(--amb);}
+.ctx2{font-size:12px;flex:1;}.cco2{font-size:11px;color:var(--mu);margin-top:2px;font-family:var(--fm);}
+
+/* ═══ FOOTER ═══ */
+footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.fi{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,.25);}.fv{color:rgba(255,255,255,.55);}.fsep{color:rgba(255,255,255,.12);}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.fade-in{animation:fu .25s ease forwards;}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:680px){
+  .form-row{gap:12px;}.prdlyt{grid-template-columns:1fr;}.prdsb{display:none;}
+  .imp-cards{grid-template-columns:1fr;}.bc-body{flex-direction:column;}.bc-dep{border-right:none;border-bottom:1px solid var(--bd);width:100%;}
+  .imp-summary-bar{gap:10px;}.imp-summary-divider{display:none;}.top .tsep,.top .tmod{display:none;}
+  .dir-tab{padding:8px 16px;font-size:14px;}.dir-tab .dir-sub{display:none;}.dir-tab .dir-icon{font-size:16px;}
+  .tnav{padding:0 12px;}.tnav-main{gap:2px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ═══ -->
+<nav class="top">
+  <span class="wm">Maersk</span>
+  <div class="tsep"></div>
+  <span class="tmod">inland.ops.de</span>
+  <div class="tr"><span class="ttag" id="todayTag"></span></div>
+</nav>
+
+<!-- ═══ TAB NAV ═══ -->
+<div class="tnav">
+  <div class="tnav-main">
+    <button class="dir-tab tab-import active" id="tab-import" onclick="switchTab('import')">
+      <span class="dir-icon">📥</span>
+      <div><span class="dir-label">Import Planner</span><span class="dir-sub">Port → Inland Depot → Customer</span></div>
+      <span class="tbdg">LIVE</span>
+    </button>
+    <button class="dir-tab tab-export" id="tab-export" onclick="switchTab('export')">
+      <span class="dir-icon">📦</span>
+      <div><span class="dir-label">Export Planner</span><span class="dir-sub">Customer → Inland Depot → Port</span></div>
+      <span class="tbdg">LIVE</span>
+    </button>
+  </div>
+  <div class="tnav-secondary">
+    <button class="spec-tab" id="tab-prd" onclick="switchTab('prd')">📋 Spec v2.0</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1: IMPORT PLANNER
+     ══════════════════════════════════════════════════ -->
+<div class="page active" id="page-import">
+  <div class="hero hero-import">
+    <div class="hi">
+      <div class="hey">Inland Operations · Germany · Inbound</div>
+      <div class="htl">Import <span class="hl-imp">Inland Planner</span></div>
+      <div class="form-row">
+        <div class="fg fg-zip">
+          <label class="fgl">Delivery PLZ</label>
+          <input class="fgi" type="text" id="impZip" placeholder="47119" maxlength="5" inputmode="numeric"
+            oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')impRun()">
+        </div>
+        <div class="fg">
+          <label class="fgl">Container</label>
+          <div class="fg-cnt">
+            <select class="fgi" id="impSize"><option value="20">20'</option><option value="40" selected>40'</option><option value="45">45'</option></select>
+            <select class="fgi" id="impType"><option value="dry">Dry</option><option value="high">High Cube</option><option value="href">Reefer</option></select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fgl">Discharge Port</label>
+          <select class="fgi" id="impPort"><option value="RTM">Rotterdam</option><option value="ANR">Antwerp</option></select>
+        </div>
+        <div class="fg">
+          <label class="fgl">Vessel ETD Date & Time</label>
+          <div class="fg-dt">
+            <input class="fgi" type="date" id="impETDDate">
+            <input class="fgi" type="time" id="impETDTime" value="08:00" style="min-width:95px">
+          </div>
+        </div>
+        <button class="gobtn gobtn-imp" onclick="impRun()">Plan →</button>
+      </div>
+    </div>
+  </div>
+  <div class="scont">
+    <div id="impEmpty" class="empty-state">
+      <div class="ei">📥</div>
+      <div class="em">Enter a delivery postcode, container details, discharge port, and vessel ETD to find available inland departures for your import shipment.</div>
+    </div>
+    <div id="impResult" style="display:none">
+      <div id="impSummary"></div>
+      <div id="impBanners"></div>
+      <div id="impTermInfo"></div>
+      <div id="impCards"></div>
+      <!-- Import ref table -->
+      <div class="refsec">
+        <div class="reftog" onclick="toggleImpRef()"><div style="display:flex;align-items:center"><span class="reftl">Import Postcode / Terminal Reference</span></div><span class="refc" id="impRefChev">▼</span></div>
+        <div class="refw" id="impRefWrap"><div id="impRefBody"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 2: EXPORT PLANNER
+     ══════════════════════════════════════════════════ -->
+<div class="page" id="page-export">
+  <div class="hero hero-export">
+    <div class="hi">
+      <div class="hey">Inland Operations · Germany · Outbound</div>
+      <div class="htl">Export <span class="hl-exp">Booking Planner</span></div>
+      <div class="form-row">
+        <div class="fg fg-zip">
+          <label class="fgl">Postcode (PLZ)</label>
+          <input class="fgi" type="text" id="expZip" placeholder="40000" maxlength="5" inputmode="numeric"
+            oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')expRun()">
+        </div>
+        <div class="fg">
+          <label class="fgl">Container</label>
+          <div class="fg-cnt">
+            <select class="fgi" id="expSize"><option value="20">20'</option><option value="40" selected>40'</option></select>
+            <select class="fgi" id="expType"><option value="dry">Dry</option><option value="high">High Cube</option><option value="href">Hanger / Reefer</option></select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fgl">Loading Date & Time (CET)</label>
+          <div class="fg-dt">
+            <input class="fgi" type="date" id="expLoadDate">
+            <input class="fgi" type="time" id="expLoadTime" value="08:00" style="min-width:95px">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fgl">Terminal</label>
+          <select class="fgi" id="expTerminal" style="min-width:260px">
+            <option value="">— Select terminal —</option>
+            <optgroup label="🇳🇱 Rotterdam">
+              <option value="NLROTTM|5|RTM">NLROTTM — APM Terminals Rotterdam (5d YOT)</option>
+              <option value="NLROTWG|7|RTM">NLROTWG — Rotterdam World Gateway (7d YOT)</option>
+              <option value="NLROT01|8|RTM">NLROT01 — Hutchison Ports Delta II (8d YOT)</option>
+              <option value="NLROT21|8|RTM">NLROT21 — ECT Delta Terminal (8d YOT)</option>
+            </optgroup>
+            <optgroup label="🇧🇪 Antwerp">
+              <option value="BEANT869|7|ANR">BEANT869 — PSA Europa Terminal (7d YOT)</option>
+              <option value="BEANT913|7|ANR">BEANT913 — PSA Noordzee Terminal (7d YOT)</option>
+            </optgroup>
+          </select>
+        </div>
+        <button class="gobtn gobtn-exp" onclick="expRun()">Plan →</button>
+      </div>
+    </div>
+  </div>
+  <div class="scont">
+    <div id="expEmpty" class="empty-state">
+      <div class="ei">📦</div>
+      <div class="em">Fill in all fields above and click <strong>Plan →</strong> to see which barges you can catch and when to book a vessel.</div>
+    </div>
+    <div id="expResult" style="display:none">
+      <div class="ctx-bar">
+        <div class="ctx-item"><span class="ctx-lbl">PLZ</span><span class="ctx-val" id="expCtxZip">—</span></div>
+        <span class="ctx-sep">·</span>
+        <div class="ctx-item"><span class="ctx-val" id="expCtxCnt">—</span></div>
+        <span class="ctx-sep">·</span>
+        <div class="ctx-item"><span class="ctx-lbl">Loading</span><span class="ctx-val" id="expCtxDate">—</span></div>
+        <span class="ctx-sep">·</span>
+        <div class="ctx-item"><span class="ctx-terminal" id="expCtxTerm">—</span><span class="ctx-yot" id="expCtxYot" style="margin-left:6px"></span></div>
+        <button class="rcl" onclick="expClear()">✕ New search</button>
+      </div>
+      <div class="section-ttl">Depot Options <span style="font-family:var(--fm);font-size:10px;color:var(--mu);font-weight:400;text-transform:none;letter-spacing:0">— click a depot to see its schedule</span></div>
+      <div class="depot-rack" id="expDepotRack"></div>
+      <div class="banner-card warn" id="expCustomsBanner" style="display:none">
+        <div class="banner-icon">⚠️</div>
+        <div class="banner-body">
+          <div class="banner-ttl">Customs Documentation Deadline</div>
+          <div class="banner-val" id="expCustomsVal">—</div>
+          <div class="banner-sub">All customs documents must be submitted before this time · Loading date/time + 3 hours</div>
+        </div>
+      </div>
+      <div class="section-ttl" id="expBargeTitle" style="display:none"></div>
+      <div class="barge-list" id="expBargeList"></div>
+      <div class="refsec">
+        <div class="reftog" onclick="toggleExpRef()"><div style="display:flex;align-items:center"><span class="reftl">Export ZIP Coverage Matrix</span><span class="refbdg" id="expRuleCount">—</span></div><span class="refc" id="expRefChev">▼</span></div>
+        <div class="refw" id="expRefWrap"><table class="reft" id="expRefTable"></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 3: PRD
+     ══════════════════════════════════════════════════ -->
+<div class="page" id="page-prd">
+  <div class="prdlyt">
+    <aside class="prdsb">
+      <div class="sbttl">Sections</div>
+      <a class="snav active" href="#" onclick="goSec('s1');return false">1 · Goal & Problem</a>
+      <a class="snav" href="#" onclick="goSec('s2');return false">2 · Users & Stories</a>
+      <a class="snav" href="#" onclick="goSec('s3');return false">3 · Inputs</a>
+      <a class="snav" href="#" onclick="goSec('s4');return false">4 · YOT Reference</a>
+      <a class="snav" href="#" onclick="goSec('s5');return false">5 · Calculation Logic</a>
+      <a class="snav" href="#" onclick="goSec('s6');return false">6 · Feasibility Rules</a>
+      <a class="snav" href="#" onclick="goSec('s7');return false">7 · Output Design</a>
+      <a class="snav" href="#" onclick="goSec('s8');return false">8 · Edge Cases</a>
+      <a class="snav" href="#" onclick="goSec('s9');return false">9 · Assumptions</a>
+      <div class="smeta">
+        <div class="smr"><span class="sml">Version</span><span class="smv">2.0</span></div>
+        <div class="smr"><span class="sml">Status</span><span class="smst">In Review</span></div>
+        <div class="smr"><span class="sml">Market</span><span class="smv">DE</span></div>
+        <div class="smr"><span class="sml">Updated</span><span class="smv">Mar 2026</span></div>
+      </div>
+    </aside>
+    <div class="prdcnt">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+        <div><div class="prddtl">Inland Planning Tool — Combined PRD</div><div class="prddst">Product Requirement Document · DE Inland Operations · CX Team</div></div>
+        <button class="expbtn" id="prdExpBtn" onclick="prdExpandAll()">Expand All</button>
+      </div>
+      <div class="psec open" id="s1"><div class="psh" onclick="toggleSec('s1')"><span class="psn">01</span><span class="pst">Goal & Problem Statement</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <h3>The Problem</h3>
+        <p><strong>Export:</strong> CX books vessels without reliably accounting for barge/rail transit times, terminal YOT, and CCO. This causes YOT refusals and CCO misses leading to rolled cargo.</p>
+        <p><strong>Import:</strong> CX needs to plan inland transport from discharge ports (Rotterdam/Antwerp) to German inland depots, coordinating barge/rail departures with vessel ETD dates and customs deadlines.</p>
+        <h3>The Goal</h3>
+        <p>A single unified tool covering both directions: <strong>Import</strong> (port → inland depot → customer delivery) and <strong>Export</strong> (customer loading → inland depot → port terminal → vessel). CX enters shipment details and immediately sees feasible options with all deadlines calculated.</p>
+      </div></div>
+      <div class="psec" id="s2"><div class="psh" onclick="toggleSec('s2')"><span class="psn">02</span><span class="pst">Users & User Stories</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <div class="ptw"><table class="pt"><tr><th>#</th><th>As a…</th><th>I want to…</th><th>So that…</th></tr>
+          <tr><td class="cid">US-1</td><td>CX Coordinator</td><td>Select ZIP, container, loading date, and terminal and see which barges I can catch (export)</td><td>I never miss a departure or book an infeasible vessel</td></tr>
+          <tr><td class="cid">US-2</td><td>CX Coordinator</td><td>Enter a delivery postcode and vessel ETD to see available inland departures (import)</td><td>I plan the optimal inland transport for inbound shipments</td></tr>
+          <tr><td class="cid">US-3</td><td>CX Coordinator</td><td>See clear vessel booking windows (export) and transport order deadlines (import)</td><td>I know exactly which options are safe without manual calculation</td></tr>
+          <tr><td class="cid">US-4</td><td>CX Coordinator</td><td>Know immediately if an ISR is required</td><td>I escalate before confirming with the customer</td></tr>
+        </table></div>
+      </div></div>
+      <div class="psec" id="s3"><div class="psh" onclick="toggleSec('s3')"><span class="psn">03</span><span class="pst">Inputs</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <h3>Export Inputs</h3>
+        <div class="ptw"><table class="pt"><tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+          <tr><td><strong>ZIP (PLZ)</strong></td><td>4–5 digit</td><td>Resolves to ranked depot list</td></tr>
+          <tr><td><strong>Container</strong></td><td>Size + Type</td><td>Affects depot routing</td></tr>
+          <tr><td><strong>Loading Date/Time</strong></td><td>Date + HH:MM</td><td>Determines earliest barge departure</td></tr>
+          <tr><td><strong>Terminal</strong></td><td>Select from 6</td><td>Drives port routing and YOT days</td></tr>
+        </table></div>
+        <h3>Import Inputs</h3>
+        <div class="ptw"><table class="pt"><tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+          <tr><td><strong>Delivery PLZ</strong></td><td>4–5 digit</td><td>Maps to barge/rail terminals</td></tr>
+          <tr><td><strong>Container</strong></td><td>Size + Type</td><td>Container details</td></tr>
+          <tr><td><strong>Discharge Port</strong></td><td>RTM / ANR</td><td>Where vessel discharges</td></tr>
+          <tr><td><strong>Vessel ETD Date/Time</strong></td><td>Date + HH:MM</td><td>Determines planning timeline</td></tr>
+        </table></div>
+      </div></div>
+      <div class="psec" id="s4"><div class="psh" onclick="toggleSec('s4')"><span class="psn">04</span><span class="pst">Terminal YOT Reference (Export)</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <p>YOT = how many calendar days before vessel ETD the terminal starts accepting gate-in.</p>
+        <div class="ptw"><table class="pt"><tr><th>Terminal</th><th>Name</th><th>Port</th><th>YOT</th></tr>
+          <tr><td class="cid">NLROTTM</td><td>APM Terminals Rotterdam</td><td>🇳🇱 RTM</td><td class="cg"><strong>5 days</strong></td></tr>
+          <tr><td class="cid">NLROTWG</td><td>Rotterdam World Gateway</td><td>🇳🇱 RTM</td><td class="ca"><strong>7 days</strong></td></tr>
+          <tr><td class="cid">NLROT01</td><td>Hutchison Ports Delta II</td><td>🇳🇱 RTM</td><td class="cr"><strong>8 days</strong></td></tr>
+          <tr><td class="cid">NLROT21</td><td>ECT Delta Terminal</td><td>🇳🇱 RTM</td><td class="cr"><strong>8 days</strong></td></tr>
+          <tr><td class="cid">BEANT869</td><td>PSA Europa Terminal</td><td>🇧🇪 ANR</td><td class="ca"><strong>7 days</strong></td></tr>
+          <tr><td class="cid">BEANT913</td><td>PSA Noordzee Terminal</td><td>🇧🇪 ANR</td><td class="ca"><strong>7 days</strong></td></tr>
+        </table></div>
+      </div></div>
+      <div class="psec" id="s5"><div class="psh" onclick="toggleSec('s5')"><span class="psn">05</span><span class="pst">Calculation Logic</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <h3>Export Logic</h3>
+        <p>Loading date → find next barge ETD → EAT (ETD + transit) → CCO boundary (EAT + buffer) → Latest vessel ETA (EAT + YOT − 1 inclusive).</p>
+        <div class="ib blue"><div class="ibt">Export Example</div><p>Barge departs Mon 02/03 → arrives Thu 05/03 (EAT). YOT=5: Day 1=Thu…Day 5=Mon 09/03. → Book vessel where CCO ≥ Thu 05/03 and ETA ≤ Mon 09/03.</p></div>
+        <h3>Import Logic</h3>
+        <p>Vessel ETD → find next terminal departures (barge/rail) → depot arrival (ETA) → customer delivery (next business day) → order deadline (5–7 biz days before ETD) → customs deadline (Rotterdam only).</p>
+        <div class="ib blue"><div class="ibt">Import Example</div><p>Vessel ETD Wed → next barge from Rotterdam on Thu → arrives at depot Mon → customer delivery Tue. Order deadline = previous week. For future bookings, 7-day lead time; for discharged cargo, 5-day lead time.</p></div>
+      </div></div>
+      <div class="psec" id="s6"><div class="psh" onclick="toggleSec('s6')"><span class="psn">06</span><span class="pst">Feasibility Rules</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <h3>Export — Hard Constraints</h3>
+        <div class="crow"><span class="cpill ph">HC-1</span><div><div class="ctx2">Vessel CCO ≥ Planning ETA</div></div></div>
+        <div class="crow"><span class="cpill ph">HC-2</span><div><div class="ctx2">Vessel ETD ≥ Planning ETA + YOT days</div></div></div>
+        <div class="crow"><span class="cpill ph">HC-3</span><div><div class="ctx2">Barge ETD ≥ customer loading date</div></div></div>
+        <h3 style="margin-top:14px">Import — Planning Rules</h3>
+        <div class="crow"><span class="cpill ph">IR-1</span><div><div class="ctx2">Transport order must be placed before order deadline</div></div></div>
+        <div class="crow"><span class="cpill ph">IR-2</span><div><div class="ctx2">Rotterdam customs docs must be submitted before customs deadline</div></div></div>
+        <div class="crow"><span class="cpill ps">IR-3</span><div><div class="ctx2">If order deadline passed → ISR required to check availability</div></div></div>
+      </div></div>
+      <div class="psec" id="s7"><div class="psh" onclick="toggleSec('s7')"><span class="psn">07</span><span class="pst">Output Design</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <h3>Export Output</h3>
+        <p>Customs deadline banner (loading + 3h) → depot options (ranked pills) → max 2 schedule cards per depot showing vessel booking window (earliest CCO, latest vessel ETA).</p>
+        <h3>Import Output</h3>
+        <p>Summary bar → terminal info → schedule cards split into "Plannable" (book directly) and "ISR Required" (deadline passed) sections with copy-to-clipboard summaries.</p>
+      </div></div>
+      <div class="psec" id="s8"><div class="psh" onclick="toggleSec('s8')"><span class="psn">08</span><span class="pst">Edge Cases</span><span class="psc">▼</span></div>
+      <div class="pbdy">
+        <div class="ptw"><table class="pt"><tr><th>#</th><th>Scenario</th><th>Behaviour</th></tr>
+          <tr><td class="cid">EC-1</td><td>No departures found</td><td>"No departures found. Contact inland team."</td></tr>
+          <tr><td class="cid">EC-2</td><td>Same-day loading (export)</td><td>Excluded — next-day departure shown with cutoff warning</td></tr>
+          <tr><td class="cid">EC-3</td><td>ZIP not covered</td><td>"Postcode not in matrix. Contact inland team."</td></tr>
+          <tr><td class="cid">EC-4</td><td>DEDUIRR depot (export)</td><td>ISR banner shown, no schedules</td></tr>
+          <tr><td class="cid">EC-5</td><td>No import rail to Frankenbach/Germersheim</td><td>Only barge options shown for these terminals</td></tr>
+          <tr><td class="cid">EC-6</td><td>Order deadline passed (import)</td><td>ISR section with email template</td></tr>
+        </table></div>
+      </div></div>
+      <div class="psec" id="s9"><div class="psh" onclick="toggleSec('s9')"><span class="psn">09</span><span class="pst">Assumptions</span><span class="psc">▼</span></div>
+      <div class="pbdy"><ul>
+        <li>Export uses <strong>last day of arrival range</strong> (conservative) for transit calculations.</li>
+        <li>Import uses <strong>single ETD/ETA day per schedule</strong> from schedule data.</li>
+        <li>All export calculations use <strong>calendar days</strong>; import uses business day logic for order deadlines.</li>
+        <li>German public holidays (2025–2027) are accounted for in import business-day calculations and flagged in export transit windows.</li>
+        <li>Tool is <strong>advisory only</strong> — does not create bookings.</li>
+      </ul></div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fi">Maersk DE Inland Ops</div><span class="fsep">·</span>
+  <div class="fi">Import + Export Planner</div>
+  <span class="fsep">·</span><div class="fi">Internal only</div>
+  <span class="fsep">·</span><div class="fi">Schedules valid as of <span class="fv">Mar 2026</span></div>
+  <span class="fsep">·</span><div class="fi">v<span class="fv">2.0</span></div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════
+// SHARED UTILITIES
+// ══════════════════════════════════════════════════════
+const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmt(d){return`${DN[d.getDay()]} ${d.getDate()} ${MN[d.getMonth()]} ${d.getFullYear()}`;}
+function fmtS(d){return`${DN[d.getDay()]} ${d.getDate()} ${MN[d.getMonth()]}`;}
+function fmtDateISO(d){return d.toISOString().slice(0,10);}
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function parseDate(s){if(!s)return null;const[y,m,dd]=s.split('-').map(Number);return new Date(y,m-1,dd);}
+function jsDay(d){return d.getDay()===0?7:d.getDay();}
+
+// Public holidays DE 2025-2027
+const HOLIDAYS_SET=new Set([
+  '2025-01-01','2025-04-18','2025-04-21','2025-05-01','2025-05-29','2025-06-09','2025-10-03','2025-12-25','2025-12-26',
+  '2026-01-01','2026-04-03','2026-04-06','2026-05-01','2026-05-14','2026-05-25','2026-10-03','2026-12-25','2026-12-26',
+  '2027-01-01','2027-03-26','2027-03-29','2027-05-01','2027-05-06','2027-05-17','2027-10-03','2027-12-25','2027-12-26',
+]);
+function isHoliday(d){return HOLIDAYS_SET.has(fmtDateISO(d));}
+function isBizDay(d){const dow=d.getDay();return dow!==0&&dow!==6&&!isHoliday(d);}
+function nextBizDay(d){let r=new Date(d);while(!isBizDay(r))r=addDays(r,1);return r;}
+function prevBizDay(d){let r=new Date(d);while(!isBizDay(r))r=addDays(r,-1);return r;}
+function holidaysInRange(start,end){const hits=[];const cur=new Date(start);while(cur<=end){if(isHoliday(cur))hits.push(new Date(cur));cur.setDate(cur.getDate()+1);}return hits;}
+
+const POSTCODE_REGIONS=[[10000,14999,"Berlin"],[15000,19999,"Brandenburg / MV"],[20000,29999,"Hamburg / Niedersachsen / Bremen"],[30000,31999,"Hannover Region"],[32000,34999,"Ostwestfalen-Lippe"],[35000,36999,"Mittelhessen / Fulda"],[37000,39999,"Suedniedersachsen / Sachsen-Anhalt"],[40000,47999,"Düsseldorf / Duisburg / NRW-West"],[48000,49999,"Münsterland"],[50000,53999,"Köln / Bonn"],[54000,56999,"Trier / Koblenz / Eifel"],[57000,59999,"Siegen / Sauerland"],[60000,65999,"Frankfurt / Rhein-Main"],[66000,69999,"Saarland / Pfalz / Mannheim"],[70000,76999,"Stuttgart / Karlsruhe"],[77000,79999,"Freiburg / Schwarzwald"],[80000,87999,"München / Oberbayern"],[88000,89999,"Bodensee / Oberschwaben"],[90000,96999,"Nürnberg / Franken"],[97000,99999,"Würzburg / Thüringen"]];
+function getRegion(zip){const z=parseInt(zip);for(const[lo,hi,l]of POSTCODE_REGIONS)if(z>=lo&&z<=hi)return l;return'Germany';}
+
+function copyText(text,btn,label){
+  const doCopy=()=>{btn.textContent='✓ Copied';btn.classList.add('copied');setTimeout(()=>{btn.textContent=label;btn.classList.remove('copied');},2200);};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(doCopy).catch(()=>{fbCopy(text);doCopy();});}else{fbCopy(text);doCopy();}
+}
+function fbCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
+
+// ══ Tab switching ══
+function switchTab(t){
+  ['import','export','prd'].forEach(id=>{
+    const tab=document.getElementById('tab-'+id);
+    tab.classList.toggle('active',id===t);
+    document.getElementById('page-'+id).classList.toggle('active',id===t);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// IMPORT PLANNER - DATA & LOGIC
+// ══════════════════════════════════════════════════════
+const IMP_SCHEDULES=[
+  {t:"Antwerpen",etd:"Wed",loc:"DEMHG02",eta:"Mon",mod:"Barge"},{t:"Antwerpen",etd:"Sat",loc:"DEMHG02",eta:"Thur",mod:"Barge"},{t:"Antwerpen",etd:"Mon",loc:"DEMHG02",eta:"Sat",mod:"Barge"},
+  {t:"Rotterdam",etd:"Thur",loc:"DEMHG02",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEMHG02",eta:"Sat",mod:"Barge"},
+  {t:"Antwerpen",etd:"Wed",loc:"DEGRH01",eta:"Mon",mod:"Barge"},{t:"Antwerpen",etd:"Sat",loc:"DEGRH01",eta:"Wed",mod:"Barge"},{t:"Antwerpen",etd:"Mon",loc:"DEGRH01",eta:"Fri",mod:"Barge"},
+  {t:"Rotterdam",etd:"Thur",loc:"DEGRH01",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEGRH01",eta:"Fri",mod:"Barge"},
+  {t:"Antwerpen",etd:"Mon",loc:"DEAJHRA",eta:"Fri",mod:"Barge"},{t:"Antwerpen",etd:"Thu",loc:"DEAJHRA",eta:"Mon",mod:"Barge"},
+  {t:"Rotterdam",etd:"Mon",loc:"DEAJHRA",eta:"Fri",mod:"Barge"},{t:"Rotterdam",etd:"Thu",loc:"DEAJHRA",eta:"Mon",mod:"Barge"},
+  {t:"Antwerpen",etd:"Mon",loc:"DEG4TG",eta:"Fri",mod:"Barge"},{t:"Antwerpen",etd:"Fri",loc:"DEG4TG",eta:"Mon",mod:"Barge"},
+  {t:"Rotterdam",etd:"Mon",loc:"DEG4TG",eta:"Fri",mod:"Barge"},{t:"Rotterdam",etd:"Thur",loc:"DEG4TG",eta:"Mon",mod:"Barge"},
+  {t:"Antwerpen",etd:"Mon",loc:"DEDUI01",eta:"Wed",mod:"Barge"},{t:"Antwerpen",etd:"Fri",loc:"DEDUI01",eta:"Mon",mod:"Barge"},
+  {t:"Rotterdam",etd:"Thur",loc:"DEDUI01",eta:"Mon",mod:"Barge"},{t:"Rotterdam",etd:"Fri",loc:"DEDUI01",eta:"Wed",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEDUI01",eta:"Fri",mod:"Barge"},
+  {t:"Rotterdam",etd:"Wed",loc:"DEDUI01",eta:"Fri",mod:"Rail"},{t:"Rotterdam",etd:"Thu",loc:"DEDUI01",eta:"Mon",mod:"Rail"},
+  {t:"Antwerpen",etd:"Mon",loc:"DEBNX01",eta:"Fri",mod:"Barge"},{t:"Rotterdam",etd:"Mon",loc:"DEBNX01",eta:"Fri",mod:"Barge"},
+  {t:"Antwerpen",etd:"Thur",loc:"DEBNX01",eta:"Tue",mod:"Barge"},{t:"Rotterdam",etd:"Thur",loc:"DEBNX01",eta:"Tue",mod:"Barge"},
+  {t:"Rotterdam",etd:"Tue",loc:"NUE02",eta:"Thu",mod:"Rail"},{t:"Rotterdam",etd:"Fri",loc:"NUE02",eta:"Sun",mod:"Rail"}
+];
+
+const IMP_TERM_NAMES={
+  'DEDUI01':'Hutchison Ports Duisburg','DEGRH01':'Germersheim DPW','DEMNZ01':'Frankenbach Mainz',
+  'DEG4TG':'Gustavsburg Contargo','DE9G4TG':'Gustavsburg Contargo','DEBNX01':'Bonn AZS',
+  'DENUE02':'Nuernberg CDN','NUE02':'Nuernberg CDN','DEMHG02':'Mannheim DPW','DEAJHRA':'Rheinhafen Andernach',
+  'DETREAZ':'AZS Trier','DEDTM01':'CTD Dortmund','DEMUNU1':'DUSS Muenchen','DELJZU1':'Leipzig Wahren'
+};
+const IMP_HAS_SCHED=new Set(['DEDUI01','DEGRH01','DEG4TG','DEBNX01','NUE02','DEMHG02','DEAJHRA']);
+const IMP_CODE_ALIAS={'DE9G4TG':'DEG4TG','DENUE02':'NUE02'};
+const IMP_NO_RAIL=new Set(['DEMNZ01','DEGRH01']);
+
+const IMP_ZIP={
+RTM:{
+'0':{b:'DELJZU1',r:'DELJZU1',t:'Hub Trucker'},'1':{b:'DELJZU1',r:'DELJZU1',t:'Hub Trucker'},
+'31':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},'32':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'33':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'34':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'35':{b:'DEMNZ01',r:null,t:'Frankenbach'},'36':{b:'DEMNZ01',r:null,t:'Frankenbach'},
+'37':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},'38':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},
+'39':{b:'DEDTM01',r:'DEDTM01',t:'Hub Trucker'},'40':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'41':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'42':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'43':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'44':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'45':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'46':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'47':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'48':{b:'DEDUI01',r:'DEDTM01',t:'HP Duisburg'},
+'49':{b:'DEDUI01',r:'DEDTM01',t:'HP Duisburg'},'50':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'51':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'52':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'53':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'54':{b:'DETREAZ',r:'DETREAZ',t:'AZS Trier'},
+'55':{b:'DEMNZ01',r:null,t:'Frankenbach / Gustavsburg'},'56':{b:'DEBNX01',r:null,t:'AZS Bonn'},
+'57':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'58':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'59':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'60':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},
+'61':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},'63':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},
+'64':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},'65':{b:'DE9G4TG',r:null,t:'Frankenbach / Gustavsburg'},
+'66':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'67':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'68':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'69':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'70':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'71':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'72':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'73':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'74':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'75':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'76':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'77':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'78':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'79':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'80':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},'81':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},
+'82':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},'83':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},
+'84':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},'85':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},
+'86':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},'87':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},
+'88':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},'89':{b:'DEGRH01',r:'DEMUNU1',t:'DP World Germersheim'},
+'90':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'91':{b:null,r:'DENUE02',t:'HPE Nuernberg'},
+'92':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'93':{b:null,r:'DENUE02',t:'HPE Nuernberg'},
+'94':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'95':{b:null,r:'DENUE02',t:'HPE Nuernberg'},
+'96':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'97':{b:null,r:'DENUE02',t:'HPE Nuernberg'},
+'98':{b:'DELJZU1',r:'DELJZU1',t:'Hub Trucker'},'99':{b:'DELJZU1',r:'DELJZU1',t:'Hub Trucker'}
+},
+ANR:{
+'32':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'33':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'34':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'35':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},
+'36':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},'37':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'38':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'39':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'40':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'41':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'42':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'43':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'44':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'45':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'46':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'47':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'48':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'49':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'50':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'51':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'52':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'53':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'54':{b:'DETREAZ',r:'DETREAZ',t:'AZS Trier'},'55':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},
+'56':{b:'DEBNX01',r:'DEBNX01',t:'AZS Bonn'},'57':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'58':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'59':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
+'60':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},'61':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
+'63':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},'64':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
+'65':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
+'66':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'67':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'68':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'69':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'70':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'71':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'72':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'73':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'74':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'75':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'76':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'77':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'78':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'79':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'80':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'81':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'82':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'83':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'84':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'85':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'86':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'87':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'88':{b:'DEGRH01',r:null,t:'DP World Germersheim'},'89':{b:'DEGRH01',r:null,t:'DP World Germersheim'},
+'90':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'91':{b:null,r:'DENUE02',t:'HPE Nuernberg'},
+'92':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'93':{b:null,r:'DENUE02',t:'HPE Nuernberg'},
+'94':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'95':{b:null,r:'DENUE02',t:'HPE Nuernberg'},
+'96':{b:null,r:'DENUE02',t:'HPE Nuernberg'},'97':{b:null,r:'DENUE02',t:'HPE Nuernberg'}
+}
+};
+
+function impScCode(c){return IMP_CODE_ALIAS[c]||c;}
+function impTName(c){return IMP_TERM_NAMES[c]||IMP_TERM_NAMES[impScCode(c)]||c;}
+function impHasSc(c){return c&&IMP_HAS_SCHED.has(impScCode(c));}
+function impDayNum(s){s=s.trim().toLowerCase().replace(/[^a-z]/g,'');if(s.startsWith('mon'))return 1;if(s.startsWith('tue'))return 2;if(s.startsWith('wed'))return 3;if(s.startsWith('thu'))return 4;if(s.startsWith('fri'))return 5;if(s.startsWith('sat'))return 6;if(s.startsWith('sun'))return 0;return-1;}
+function impNextWD(from,dow){const d=new Date(from);d.setHours(0,0,0,0);const diff=(dow-d.getDay()+7)%7;d.setDate(d.getDate()+diff);return d;}
+function dFromNow(date){const n=new Date();n.setHours(0,0,0,0);const t=new Date(date);t.setHours(0,0,0,0);return Math.ceil((t-n)/864e5);}
+function urgTag(dl){if(dl<0)return'<span class="urgency-tag urgency-red">PASSED</span>';if(dl===0)return'<span class="urgency-tag urgency-red">TODAY</span>';if(dl<=2)return'<span class="urgency-tag urgency-red">'+dl+'D LEFT</span>';if(dl<=5)return'<span class="urgency-tag urgency-amber">'+dl+'D LEFT</span>';return'<span class="urgency-tag urgency-green">'+dl+'D</span>';}
+
+function impLookupTerms(zip,port){const z2=zip.substring(0,2);const m=IMP_ZIP[port];if(!m)return null;let e=m[z2];if(!e)e=m[z2.charAt(0)];return e||null;}
+function impFindScheds(termCode,port,modFilter){const sc=impScCode(termCode);const tn=port==='RTM'?'Rotterdam':'Antwerpen';return IMP_SCHEDULES.filter(s=>s.t===tn&&s.loc===sc&&(!modFilter||s.mod===modFilter));}
+
+function impComputeInst(sched,vesselETD,vesselTime,port,isFuture,weeks){
+  const inst=[];const now=new Date();
+  const etdDow=impDayNum(sched.etd);const etaDow=impDayNum(sched.eta);
+  const searchFrom=isFuture?addDays(vesselETD,1):new Date(now);searchFrom.setHours(0,0,0,0);
+  const vp1=addDays(vesselETD,1);const parts=(vesselTime||'08:00').split(':');vp1.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
+  for(let w=0;w<weeks;w++){
+    const base=addDays(searchFrom,w*7);const termETD=impNextWD(base,etdDow);
+    if(termETD<searchFrom||termETD<=now)continue;
+    let depotArr=impNextWD(addDays(termETD,1),etaDow);
+    if(depotArr<=termETD)depotArr=addDays(depotArr,7);
+    const custDel=nextBizDay(addDays(depotArr,1));
+    const orderDL=prevBizDay(addDays(termETD,isFuture?-7:-5));
+    let custDL=null;
+    if(port==='RTM'){const d=termETD.getDay();if(d===0||d===1||d===6){const fri=new Date(termETD);while(fri.getDay()!==5)fri.setDate(fri.getDate()-1);fri.setHours(15,0,0,0);custDL=fri;}else{custDL=addDays(termETD,-1);custDL.setHours(12,0,0,0);}}
+    if(port==='RTM'&&custDL){if(isFuture){if(custDL<=vp1||now>=custDL)continue;}else{if(now>=custDL)continue;}}
+    const dsv=Math.round((termETD-vesselETD)/864e5);const plan=now<orderDL;const rec=(dsv>=1&&dsv<=10&&plan);
+    inst.push({mod:sched.mod,etd:termETD,eta:depotArr,custDel,orderDL,custDL,loc:sched.loc,etdDay:sched.etd,etaDay:sched.eta,plan,rec});
+  }
+  inst.sort((a,b)=>a.etd-b.etd);
+  const seen={},out=[];for(const i of inst){const k=fmtDateISO(i.etd)+'-'+i.mod+'-'+i.loc;if(!seen[k]){seen[k]=1;out.push(i);}}return out;
+}
+
+// Import state
+let impTerms=null,impAll=[],impPort='',impETD=null,impTime='',impIsFuture=true;
+
+function impRun(){
+  const zip=document.getElementById('impZip').value.trim();
+  const size=document.getElementById('impSize').value;const type=document.getElementById('impType').value;
+  const port=document.getElementById('impPort').value;const etdStr=document.getElementById('impETDDate').value;
+  const etdTime=document.getElementById('impETDTime').value||'08:00';
+  if(!zip||zip.length<4||isNaN(zip)){alert('Please enter a valid postcode.');return;}
+  if(!etdStr){alert('Please select a Vessel ETD date.');return;}
+  const vesselETD=parseDate(etdStr);const now=new Date();now.setHours(0,0,0,0);
+  const isFuture=vesselETD>now;
+  impPort=port;impETD=vesselETD;impTime=etdTime;impIsFuture=isFuture;
+  const terms=impLookupTerms(zip,port);
+  document.getElementById('impEmpty').style.display='none';
+  document.getElementById('impResult').style.display='block';
+  if(!terms){
+    document.getElementById('impSummary').innerHTML='';document.getElementById('impTermInfo').innerHTML='';
+    document.getElementById('impBanners').innerHTML=`<div class="banner-card danger"><div class="banner-icon">🚫</div><div class="banner-body"><div class="banner-ttl">No terminal mapping</div><p>No terminal mapping found for postcode <strong>${zip}</strong> via ${port==='RTM'?'Rotterdam':'Antwerp'}. Contact inland operations.</p></div></div>`;
+    document.getElementById('impCards').innerHTML='';return;
+  }
+  impTerms=terms;let all=[];
+  if(terms.b){const bs=impFindScheds(terms.b,port,'Barge');for(const s of bs)all=all.concat(impComputeInst(s,vesselETD,etdTime,port,isFuture,8));}
+  if(terms.r&&!IMP_NO_RAIL.has(impScCode(terms.r))){const rs=impFindScheds(terms.r,port,'Rail');for(const s of rs)all=all.concat(impComputeInst(s,vesselETD,etdTime,port,isFuture,8));}
+  if(terms.b&&terms.r&&impScCode(terms.b)!==impScCode(terms.r)){
+    if(!IMP_NO_RAIL.has(impScCode(terms.b))){const xr=impFindScheds(terms.b,port,'Rail');for(const s of xr)all=all.concat(impComputeInst(s,vesselETD,etdTime,port,isFuture,8));}
+    const xb=impFindScheds(terms.r,port,'Barge');for(const s of xb)all=all.concat(impComputeInst(s,vesselETD,etdTime,port,isFuture,8));
+  }
+  all.sort((a,b)=>a.etd-b.etd);
+  const seen={};impAll=[];for(const m of all){const key=fmtDateISO(m.etd)+'-'+m.mod+'-'+m.loc;if(!seen[key]){seen[key]=1;impAll.push(m);}}
+  // Render
+  const pn=port==='RTM'?'Rotterdam':'Antwerp';const r=getRegion(zip);
+  const tb=isFuture?'<span class="booking-type-badge booking-future">🚢 Future Booking</span>':'<span class="booking-type-badge booking-past">📦 Already Discharged</span>';
+  document.getElementById('impSummary').innerHTML=`<div class="imp-summary-bar fade-in">
+    <div class="imp-summary-item"><span class="s-label">Postcode</span><span class="s-value">${zip} <span style="font-weight:400;font-size:10px;color:var(--mu)">${r}</span></span></div><div class="imp-summary-divider"></div>
+    <div class="imp-summary-item"><span class="s-label">Container</span><span class="s-value">${size}' ${type}</span></div><div class="imp-summary-divider"></div>
+    <div class="imp-summary-item"><span class="s-label">Port</span><span class="s-value">${pn}</span></div><div class="imp-summary-divider"></div>
+    <div class="imp-summary-item"><span class="s-label">Vessel ETD</span><span class="s-value">${fmtS(vesselETD)} ${etdTime}</span></div><div class="imp-summary-divider"></div>
+    <div class="imp-summary-item"><span class="s-label">Type</span>${tb}</div></div>`;
+  // Terminal info
+  let ti='<div class="imp-terminal-info fade-in">';
+  if(terms.b){ti+=`<div class="ti-item"><span class="ti-mode ti-barge">Barge</span><span class="ti-name">${impTName(terms.b)}</span><span class="ti-code">${terms.b}</span>${!impHasSc(terms.b)?'<span class="ti-no-sched">No schedule yet</span>':''}</div>`;}
+  if(terms.r&&impScCode(terms.r)!==impScCode(terms.b||'')&&!IMP_NO_RAIL.has(impScCode(terms.r))){
+    ti+=`<div class="ti-divider"></div><div class="ti-item"><span class="ti-mode ti-rail">Rail</span><span class="ti-name">${impTName(terms.r)}</span><span class="ti-code">${terms.r}</span>${!impHasSc(terms.r)?'<span class="ti-no-sched">No schedule yet</span>':''}</div>`;
+  }
+  ti+=`<div class="ti-divider"></div><div class="ti-item"><span style="font-family:var(--fm);font-size:9px;color:var(--mu)">TRUCK:</span><span style="font-size:11px;font-weight:600">${terms.t}</span></div></div>`;
+  document.getElementById('impTermInfo').innerHTML=ti;
+  document.getElementById('impBanners').innerHTML='';
+  // Cards
+  if(isFuture){
+    const plan=impAll.filter(i=>i.plan),isr=impAll.filter(i=>!i.plan);
+    if(!plan.length&&!isr.length){document.getElementById('impCards').innerHTML='<div class="no-sched">No plannable departures found. Contact inland operations.</div>';return;}
+    let html='';
+    if(isr.length){html+=`<div class="imp-section-header isr-needed fade-in"><span>⚡ Nearest Departures — ISR Required</span><span class="imp-section-count">${Math.min(isr.length,2)}</span></div>`;html+=impRenderCards(isr.slice(0,2),true);}
+    if(plan.length){html+=`<div class="imp-section-header plannable fade-in" ${isr.length?'style="margin-top:20px"':''}><span>✓ Targetable Departures — Book Directly</span><span class="imp-section-count">${Math.min(plan.length,3)}</span></div>`;html+=impRenderCards(plan.slice(0,3),false);}
+    document.getElementById('impCards').innerHTML=html;
+  } else {
+    const plannable=impAll.filter(i=>i.plan);const show=plannable.length>1?plannable.slice(1,4):plannable.slice(0,3);
+    if(!show.length){document.getElementById('impCards').innerHTML='<div class="no-sched">No plannable departures found. Contact inland operations.</div>';return;}
+    document.getElementById('impCards').innerHTML=`<div class="imp-section-header plannable fade-in"><span>✓ Available Departures — Plan Directly</span><span class="imp-section-count">${show.length}</span></div>`+impRenderCards(show,false);
+  }
+}
+
+function impRenderCards(scheds,isISR){
+  let h='<div class="imp-cards">';
+  scheds.forEach((s,i)=>{
+    const mc=s.mod.toLowerCase()==='barge'?'imp-mode-barge':'imp-mode-rail';
+    const tr=Math.round((s.eta-s.etd)/864e5);const odl=dFromNow(s.orderDL);const cdl=s.custDL?dFromNow(s.custDL):null;
+    const cc=isISR?'imp-card isr-card':'imp-card';
+    const sb=isISR?'<span class="imp-status-badge imp-status-isr">ISR NEEDED</span>':'<span class="imp-status-badge imp-status-plannable">PLANNABLE</span>';
+    const rb=s.rec?'<span class="imp-rec-badge">★ Recommended</span>':'';
+    const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
+    h+=`<div class="${cc} fade-in" style="animation-delay:${i*.08}s">
+      <div class="imp-card-header"><div class="imp-card-htop"><div class="imp-card-hleft"><span class="imp-mode-badge ${mc}">${s.mod}</span><span class="imp-card-depot">${impTName(s.loc)}</span><span class="imp-card-code">${s.loc}</span></div><div>${sb}</div></div>
+      <div class="imp-card-hmeta"><span class="imp-transit-badge">${tr}d transit</span>${rb}</div></div>
+      <div class="imp-card-body">
+        <div class="imp-card-row"><span class="imp-card-label">Terminal ETD</span><span class="imp-card-value" style="color:var(--blue)">${fmt(s.etd)}</span></div>
+        <div class="imp-card-row"><span class="imp-card-label">Depot Arrival</span><span class="imp-card-value">${fmt(s.eta)}</span></div>
+        <div class="imp-card-row"><span class="imp-card-label">Customer Delivery</span><span class="imp-card-value" style="color:var(--grn)">${fmt(s.custDel)}${s.loc==='DEDUI01'?' <span style="font-size:10px;color:var(--amb)">after 12:00</span>':''}</span></div>
+        <div class="imp-card-row"><span class="imp-card-label">Order Deadline</span><span class="imp-card-value${isISR?' style="color:var(--red)"':''}">${fmt(s.orderDL)} ${urgTag(odl)}</span></div>
+        ${impPort==='RTM'&&s.custDL?`<div class="imp-card-row"><span class="imp-card-label">Customs Deadline</span><span class="imp-card-value" style="color:var(--amb)">${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')} ${urgTag(cdl)}</span></div>`:''}
+      </div>
+      ${isISR?`<div class="imp-card-note isr-note">📋 TO deadline passed — raise ISR to check availability on this ${s.mod.toLowerCase()}</div>`
+        :`<div class="imp-card-note transport-note">📝 Remarks: <code>Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>`}
+      <div class="imp-card-footer"><span class="imp-card-vendor">Truck: ${impTerms.t}</span><div class="imp-card-btns">
+        ${isISR?`<button class="copy-btn" onclick="impCopyISR(${i},this)">📧 Copy ISR</button>`:''}
+        <button class="copy-btn" onclick="impCopySummary(${i},${isISR},this)">⎘ Copy Summary</button>
+      </div></div></div>`;
+  });
+  return h+'</div>';
+}
+
+function impCopySummary(idx,isISR,btn){
+  let list;
+  if(impIsFuture){list=isISR?impAll.filter(i=>!i.plan).slice(0,2):impAll.filter(i=>i.plan).slice(0,3);}
+  else{const pl=impAll.filter(i=>i.plan);list=pl.length>1?pl.slice(1,4):pl.slice(0,3);}
+  const s=list[idx];if(!s)return;const pn=impPort==='RTM'?'Rotterdam':'Antwerp';
+  const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
+  let t=`IMPORT INLAND PLAN\nStatus: ${isISR?'ISR REQUIRED':'PLANNABLE'}${s.rec?' - RECOMMENDED':''}\nPort: ${pn}\nTerminal: ${impTName(s.loc)} (${s.loc})\nMode: ${s.mod} (${s.etdDay} schedule)\nTerminal ETD: ${fmt(s.etd)}\nDepot Arrival: ${fmt(s.eta)}\nCustomer Delivery: ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\nOrder Deadline: ${fmt(s.orderDL)}\n`;
+  if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline: ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
+  t+=`Truck Vendor: ${impTerms.t}\n`;
+  if(isISR)t+=`\nAction: Raise ISR to check availability on this ${s.mod.toLowerCase()}\n`;
+  else t+=`\nTransport Order Remarks: Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}\n`;
+  copyText(t,btn,'⎘ Copy Summary');
+}
+
+function impCopyISR(idx,btn){
+  const list=impAll.filter(i=>!i.plan).slice(0,2);const s=list[idx];if(!s)return;
+  const pn=impPort==='RTM'?'Rotterdam':'Antwerp';const terminal=impPort==='RTM'?'Rotterdam':'Antwerpen';
+  const zip=document.getElementById('impZip').value.trim();const size=document.getElementById('impSize').value;
+  const type=document.getElementById('impType').value;const region=getRegion(zip);
+  let t=`Subject: ISR Request - ${s.mod} ${fmt(s.etd)} to ${s.loc} ${impTName(s.loc)}\n\nHi,\n\nCould you please check availability on the below ${s.mod.toLowerCase()} departure? The transport order deadline has passed.\n\nREQUESTED ${s.mod.toUpperCase()}\n${s.mod} ETD:         ${fmt(s.etd)}\n${s.mod} ETA:         ${fmt(s.eta)}\nSchedule:            ${s.etdDay} departure (${terminal})\nCustomer Delivery:   ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\n\nROUTE\nDischarge Port:      ${pn}\nDeparture Terminal:  ${terminal}\nInland Depot:        ${s.loc} - ${impTName(s.loc)}\nDelivery Postcode:   ${zip} (${region})\n\nCONTAINER DETAILS\nContainer Size:      ${size}'\nContainer Type:      ${type}\n\nDEADLINE STATUS\nOrder Deadline:      ${fmt(s.orderDL)} - PASSED\n`;
+  if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline:    ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
+  t+=`\nCould you confirm if there is still space available on this ${s.mod.toLowerCase()} (${s.etdDay} from ${terminal})?\n\nThank you.\n`;
+  copyText(t,btn,'📧 Copy ISR');
+}
+
+// Import ref table
+let impRefOpen=false;
+function toggleImpRef(){
+  impRefOpen=!impRefOpen;
+  document.getElementById('impRefWrap').classList.toggle('open',impRefOpen);
+  document.getElementById('impRefChev').classList.toggle('open',impRefOpen);
+  if(impRefOpen&&!document.getElementById('impRefBody').innerHTML)buildImpRef();
+}
+function buildImpRef(){
+  const allP={};for(const p in IMP_ZIP.RTM)allP[p]=1;for(const p in IMP_ZIP.ANR)allP[p]=1;
+  const sorted=Object.keys(allP).sort((a,b)=>parseInt(a)-parseInt(b));
+  let h='<table class="reft"><thead><tr><th>Zip</th><th>Region</th><th>RTM Barge</th><th>RTM Rail</th><th>ANR Barge</th><th>ANR Rail</th><th>Truck</th></tr></thead><tbody>';
+  for(const pfx of sorted){
+    const region=getRegion(pfx+'000');const rtm=IMP_ZIP.RTM[pfx];const anr=IMP_ZIP.ANR[pfx];
+    const f=(c,isR)=>{if(!c)return'<span class="no-sched-cell">—</span>';const nr=isR&&IMP_NO_RAIL.has(impScCode(c));const hs=impHasSc(c);return`<span${(!hs||nr)?' class="no-sched-cell"':''}>${c}${nr?' (no rail)':''}</span>`;};
+    h+=`<tr><td style="font-family:var(--fm)">${pfx}xxx</td><td>${region}</td><td>${rtm?f(rtm.b,false):'—'}</td><td>${rtm&&rtm.r?f(rtm.r,true):'—'}</td><td>${anr?f(anr.b,false):'—'}</td><td>${anr&&anr.r?f(anr.r,true):'—'}</td><td>${rtm?rtm.t:(anr?anr.t:'—')}</td></tr>`;
+  }
+  document.getElementById('impRefBody').innerHTML=h+'</tbody></table>';
+}
+
+// ══════════════════════════════════════════════════════
+// EXPORT PLANNER - DATA & LOGIC
+// ══════════════════════════════════════════════════════
+const EXP_DEPOTS={
+  'DEDUI01':'Hutchison Ports Duisburg','DEDUI03':'DIT Depot Duisburg','DEDUIRR':'RRT Depot Duisburg',
+  'DEDTM01':'CTD Dortmund','DEBNX01':'Bonn AZS','DETREAZ':'Trier AZS','DEAJHRA':'Rheinhafen Andernach',
+  'DEG4TG':'Gustavsburg Contargo','DEMNZ01':'Mainz Frankenbach','DEGRH01':'Germersheim DPW',
+  'DEMUN01':'Muenchen (Rail Hub)','DENUE02':'Nuernberg CDN (Rail Hub)',
+};
+const EXP_TERM_NAMES={'NLROTTM':'APM Terminals Rotterdam','NLROTWG':'Rotterdam World Gateway','NLROT01':'Hutchison Ports Delta II','NLROT21':'ECT Delta Terminal','BEANT869':'PSA Europa Terminal','BEANT913':'PSA Noordzee Terminal'};
+
+const EXP_SCHED={
+  'DEDUI01':{RTM:[{mod:'Rail',dep:4,transit:1,buffer:2},{mod:'Rail',dep:7,transit:2,buffer:2}],ANR:[{mod:'Barge',dep:3,transit:2,buffer:2},{mod:'Barge',dep:5,transit:3,buffer:2}]},
+  'DEBNX01':{RTM:[{mod:'Barge',dep:2,transit:3,buffer:2},{mod:'Barge',dep:6,transit:2,buffer:2}],ANR:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:6,transit:2,buffer:2}]},
+  'DEAJHRA':{RTM:[{mod:'Barge',dep:6,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:2,transit:4,buffer:1}]},
+  'DEGRH01':{RTM:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:7,transit:4,buffer:1},{mod:'Barge',dep:3,transit:4,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
+  'DEG4TG':{RTM:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:4,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}],ANR:[{mod:'Barge',dep:3,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
+  'DEMHG02':{RTM:[{mod:'Barge',dep:1,transit:4,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}],ANR:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:4,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
+  'DEMNZ01':{RTM:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}]},
+};
+
+const EXP_RULES=[
+  {id:'r01',zipLabel:'31000–31999',ranges:[[31000,31999]],rtm:{p1:'DEDTM01'},anr:{p1:null},isrOnP3:false},
+  {id:'r02',zipLabel:'32000–34999',ranges:[[32000,34999]],rtm:{p1:'DEDUI01',p2:'DEDUI03',p3:'DEDUIRR'},anr:{p1:'DEDUI01'},isrOnP3:true},
+  {id:'r03',zipLabel:'35000–36999',ranges:[[35000,36999]],rtm:{p1:'DEMNZ01'},anr:{p1:'DEMNZ01'},isrOnP3:false},
+  {id:'r04',zipLabel:'37000–39999',ranges:[[37000,39999]],rtm:{p1:'DEDTM01'},anr:{p1:'DEDUI01'},isrOnP3:false},
+  {id:'r05',zipLabel:'40000–47999',ranges:[[40000,47999]],rtm:{p1:'DEDUI01',p2:'DEDUI03',p3:'DEDUIRR'},anr:{p1:'DEDUI01'},isrOnP3:true},
+  {id:'r06',zipLabel:'48000–53999',ranges:[[48000,53999]],rtm:{p1:'DEDUI01'},anr:{p1:'DEDUI01'},isrOnP3:false},
+  {id:'r07',zipLabel:'54000–54999',ranges:[[54000,54999]],rtm:{p1:'DETREAZ'},anr:{p1:'DETREAZ'},isrOnP3:false},
+  {id:'r08',zipLabel:'55000–55999',ranges:[[55000,55999]],rtm:{p1:'DEMNZ01'},anr:{p1:'DEMNZ01'},isrOnP3:false},
+  {id:'r09',zipLabel:'56000–56999',ranges:[[56000,56999]],rtm:{p1:'DEBNX01'},anr:{p1:'DEBNX01'},isrOnP3:false},
+  {id:'r10',zipLabel:'57000–59999',ranges:[[57000,59999]],rtm:{p1:'DEDUI01',p2:'DEDUI03',p3:'DEDUIRR'},anr:{p1:'DEDUI01'},isrOnP3:true},
+  {id:'r11',zipLabel:'60000–65999',ranges:[[60000,65999]],rtm:{p1:'DEG4TG'},anr:{p1:'DEG4TG'},isrOnP3:false},
+  {id:'r12',zipLabel:'66000–89999',ranges:[[66000,89999]],rtm:{p1:'DEGRH01'},anr:{p1:'DEGRH01'},isrOnP3:false},
+  {id:'r13',zipLabel:'90000–97999',ranges:[[90000,97999]],rtm:{p1:'DEMNZ01'},anr:{p1:'DEMNZ01'},isrOnP3:false},
+];
+
+function expFindRule(zip){const z=parseInt(zip,10);for(const r of EXP_RULES){if(r.ranges.some(([lo,hi])=>z>=lo&&z<=hi))return r;}return null;}
+
+function expGetNextDeps(code,port,loadingDate,loadTimeStr,n=2){
+  const sch=(EXP_SCHED[code]||{})[port];if(!sch||!sch.length)return{deps:[],skipped:[]};
+  const[lh,lm]=(loadTimeStr||'08:00').split(':').map(Number);const loadingAfterNoon=(lh*60+lm)>=720;
+  const found=[];const skipped=[];
+  for(let offset=0;offset<=25&&found.length<n;offset++){
+    const d=addDays(loadingDate,offset);const dow=jsDay(d);
+    for(const s of sch){
+      if(s.dep!==dow)continue;if(offset===0)continue;
+      if(offset===1&&loadingAfterNoon){skipped.push({mod:s.mod,etd:new Date(d),reason:'next-day-cutoff'});continue;}
+      if(found.length<n){
+        found.push({mod:s.mod,etd:new Date(d),eat:addDays(d,s.transit),buffer:s.buffer||2,offset,nextDayCutoff:offset===1&&!loadingAfterNoon});
+      }
+    }
+  }
+  return{deps:found,skipped};
+}
+
+function expRun(){
+  const zip=document.getElementById('expZip').value.trim();const size=document.getElementById('expSize').value;
+  const type=document.getElementById('expType').value;const loadDate=document.getElementById('expLoadDate').value;
+  const termVal=document.getElementById('expTerminal').value;
+  if(!zip||zip.length<4){alert('Please enter a valid postcode.');return;}
+  if(!loadDate){alert('Please select a loading date.');return;}
+  if(!termVal){alert('Please select a terminal.');return;}
+  const[termCode,yotStr,port]=termVal.split('|');const yot=parseInt(yotStr);const loadingDate=parseDate(loadDate);
+  const rule=expFindRule(zip);
+  document.getElementById('expEmpty').style.display='none';
+  document.getElementById('expResult').style.display='block';
+  // Context bar
+  const loadTime=document.getElementById('expLoadTime').value||'08:00';
+  document.getElementById('expCtxZip').textContent=`${zip} · ${getRegion(zip)}`;
+  document.getElementById('expCtxCnt').textContent=`${size}' ${type.charAt(0).toUpperCase()+type.slice(1)}`;
+  document.getElementById('expCtxDate').textContent=`${fmtS(loadingDate)} ${loadTime} CET`;
+  document.getElementById('expCtxTerm').textContent=termCode;
+  document.getElementById('expCtxYot').textContent=`· ${yot}d YOT`;
+  if(!rule){
+    document.getElementById('expDepotRack').innerHTML=`<div class="no-sched">🚫 Postcode <strong>${zip}</strong> is not in the depot matrix. Contact the inland coordination team.</div>`;
+    document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';return;
+  }
+  const opts=port==='RTM'?rule.rtm:(rule.anr||rule.rtm);
+  if(opts.p1===null){
+    document.getElementById('expDepotRack').innerHTML=`<div class="no-sched-isr">🚢 This ZIP code area is not serviced via Antwerp by barge. Please select a Rotterdam terminal.</div>`;
+    document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';return;
+  }
+  // Depot pills
+  function pill(code,rank,isrR,isMulti,multiTxt){
+    const labels=['','Preferred','2nd Option','3rd Option'];const isrHtml=isrR?'<span class="dp-isr">ISR</span>':'';
+    if(isMulti)return`<div class="depot-pill rank${rank}" style="cursor:default"><div class="dp-num dp-n${rank}">${rank}</div><div><div class="dp-code" style="font-size:11px">${multiTxt}</div><div class="dp-name">Multiple — contact inland team</div></div><span style="font-family:var(--fm);font-size:10px;color:var(--mu);margin-left:4px">${labels[rank]}</span></div>`;
+    return`<div class="depot-pill rank${rank}" onclick="expSelectDepot('${code}')" data-depot="${code}"><div class="dp-num dp-n${rank}">${rank}</div><div><div class="dp-code">${code}</div><div class="dp-name">${EXP_DEPOTS[code]||''}</div></div>${isrHtml}<span style="font-family:var(--fm);font-size:10px;color:var(--mu);margin-left:4px">${labels[rank]}</span></div>`;
+  }
+  let dp='';
+  if(opts.p1)dp+=pill(opts.p1,1,false,false,'');
+  if(opts.p2)dp+=pill(opts.p2,2,false,false,'');
+  if(opts.p3)dp+=pill(opts.p3,3,rule.isrOnP3,false,'');
+  document.getElementById('expDepotRack').innerHTML=dp;
+  // Customs deadline
+  const[lh2,lm2]=loadTime.split(':').map(Number);
+  const deadlineDate=new Date(loadingDate);deadlineDate.setHours(lh2,lm2+180,0,0);
+  document.getElementById('expCustomsVal').textContent=`${DN[deadlineDate.getDay()]} ${deadlineDate.getDate()} ${MN[deadlineDate.getMonth()]} ${deadlineDate.getFullYear()} · ${String(deadlineDate.getHours()).padStart(2,'0')}:${String(deadlineDate.getMinutes()).padStart(2,'0')} CET`;
+  document.getElementById('expCustomsBanner').style.display=port==='RTM'?'flex':'none';
+  document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';
+  expSelectDepot(opts.p1);
+}
+
+function expSelectDepot(code){
+  if(!code)return;
+  const termVal=document.getElementById('expTerminal').value;const loadDate=document.getElementById('expLoadDate').value;
+  if(!termVal||!loadDate)return;
+  document.querySelectorAll('#page-export .depot-pill[data-depot]').forEach(p=>p.classList.toggle('selected',p.dataset.depot===code));
+  const bargeList=document.getElementById('expBargeList');const bargeTitle=document.getElementById('expBargeTitle');
+  if(code==='DEDUIRR'){bargeTitle.style.display='none';bargeList.innerHTML='<div class="deduirr-banner">⛔ Please Raise an ISR for booking possibilities</div>';return;}
+  const[termCode,yotStr,port]=termVal.split('|');const yot=parseInt(yotStr);const loadingDate=parseDate(loadDate);
+  const loadTimeStr=document.getElementById('expLoadTime').value||'08:00';
+  const{deps,skipped}=expGetNextDeps(code,port,loadingDate,loadTimeStr);
+  const name=EXP_DEPOTS[code]||code;
+  bargeTitle.style.display='block';bargeTitle.textContent=`${name} — Departures & Vessel Booking Window`;
+  if(!deps.length){
+    let skipN='';
+    if(skipped.length){const s=skipped[0];skipN=`<div class="bc-skipped">${s.mod==='Rail'?'🚂':'🛳'} <strong>${s.mod} on ${fmtS(s.etd)}</strong> was skipped — loading after 12:00 does not allow enough time.</div>`;}
+    const noSchedDepots=['DEMUN01','DENUE02','DETREAZ','DEDUI03','DEDTM01'];
+    bargeList.innerHTML=skipN+(noSchedDepots.includes(code)?`<div class="no-sched-isr">📋 Schedule not yet available for <strong>${name}</strong>. Please raise an ISR.</div>`:`<div class="no-sched">No departures available for <strong>${code}</strong> within the planning window.</div>`);
+  } else {
+    deps[0].isRecommended=true;
+    let skipN='';if(skipped.length){const s=skipped[0];skipN=`<div class="bc-skipped">${s.mod==='Rail'?'🚂':'🛳'} <strong>${s.mod} on ${fmtS(s.etd)}</strong> skipped — loading after 12:00 is too late.</div>`;}
+    const termName=EXP_TERM_NAMES[termCode]||termCode;const zip2=document.getElementById('expZip').value;
+    const ctx={zip:zip2,container:`${document.getElementById('expSize').value}' ${document.getElementById('expType').value}`,loadDate,loadTime:loadTimeStr,depotCode:code,depotName:name,termCode,termName};
+    bargeList.innerHTML=skipN+deps.map(d=>expBargeCard(d,yot,ctx)).join('');
+  }
+  setTimeout(()=>bargeTitle.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+
+function expBargeCard(dep,yot,ctx){
+  const modIcon=dep.mod==='Rail'?'🚂':'🛳';
+  const ccoMin=addDays(dep.eat,dep.buffer||2);const latestETA=addDays(dep.eat,yot-1);
+  const recBadge=dep.isRecommended?'<div class="bc-rec-badge">✓ Recommended</div>':'';
+  const cutoffNote=dep.nextDayCutoff?'<div class="bc-cutoff-note">⏰ Load before 12:00 to make this departure</div>':'';
+  const hols=holidaysInRange(dep.etd,dep.eat);
+  const holHtml=hols.length?`<div class="bc-holiday-warn">⚠ Public holiday in transit: ${hols.map(h=>fmtS(h)).join(', ')} — verify with depot</div>`:'';
+  return`<div class="bc${dep.isRecommended?' bc-recommended':''}">
+    <div class="bc-accent ${dep.mod.toLowerCase()}"></div>
+    <div class="bc-body">
+      <div class="bc-dep">
+        <div class="bc-dep-tag">${modIcon} ${dep.mod} Departure</div>
+        <div class="bc-dep-date">${fmtS(dep.etd)}</div>
+        <div class="bc-dep-year">${dep.etd.getFullYear()}</div>
+        ${recBadge}${cutoffNote}${holHtml}
+      </div>
+      <div class="bc-win">
+        <div class="bc-win-hdr">VESSEL PLANNING WINDOW</div>
+        <div class="bc-win-ttl">Select a vessel within the following window:</div>
+        <div class="bc-win-rows">
+          <div class="win-item"><div class="win-item-lbl cco">Earliest Vessel CCO</div><div class="win-item-date cco">${fmtS(ccoMin)}</div><div class="win-item-sub">${ccoMin.getFullYear()}</div></div>
+          <div class="win-item"><div class="win-item-lbl etd">Latest Vessel ETA</div><div class="win-item-date etd">${fmtS(latestETA)}</div><div class="win-item-sub">${latestETA.getFullYear()}</div></div>
+        </div>
+        <button class="copy-btn" onclick="expCopyBooking(this)"
+          data-zip="${ctx.zip}" data-container="${ctx.container}" data-loaddate="${ctx.loadDate}" data-loadtime="${ctx.loadTime}"
+          data-depot="${ctx.depotCode}" data-depotname="${ctx.depotName}" data-modality="${dep.mod}" data-etd="${fmt(dep.etd)}"
+          data-terminal="${ctx.termCode}" data-termname="${ctx.termName}" data-cco="${fmt(ccoMin)}" data-eta="${fmt(latestETA)}">⎘ Copy Booking Summary</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function expCopyBooking(btn){
+  const d=btn.dataset;
+  const text=[
+    'MAERSK DE — EXPORT BOOKING SUMMARY','─────────────────────────────────',
+    `Customer ZIP (PLZ)  : ${d.zip}`,`Container           : ${d.container}`,
+    `Loading Date        : ${(d.loaddate||'').split('-').reverse().join('/')}`,`Loading Time (CET)  : ${d.loadtime}`,
+    '─────────────────────────────────','INLAND TRANSPORT',
+    `Depot               : ${d.depot} — ${d.depotname}`,`Modality            : ${d.modality}`,`Departure (ETD)     : ${d.etd}`,
+    '─────────────────────────────────','VESSEL PLANNING WINDOW',
+    `Terminal            : ${d.terminal} — ${d.termname}`,`Earliest Vessel CCO : ${d.cco}`,`Latest Vessel ETA   : ${d.eta}`,
+    '─────────────────────────────────',
+    `Generated           : ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} · Maersk DE Inland Ops v2.0`,
+  ].join('\n');
+  copyText(text,btn,'⎘ Copy Booking Summary');
+}
+
+function expClear(){
+  document.getElementById('expResult').style.display='none';document.getElementById('expEmpty').style.display='block';
+  document.getElementById('expZip').value='';document.getElementById('expTerminal').value='';document.getElementById('expLoadDate').value='';
+  document.getElementById('expCustomsBanner').style.display='none';document.getElementById('expBargeTitle').style.display='none';
+  document.getElementById('expBargeList').innerHTML='';
+}
+
+// Export ref table
+let expRefOpen=false;
+function toggleExpRef(){
+  expRefOpen=!expRefOpen;
+  document.getElementById('expRefWrap').classList.toggle('open',expRefOpen);
+  document.getElementById('expRefChev').classList.toggle('open',expRefOpen);
+  if(expRefOpen&&!document.getElementById('expRefTable').innerHTML)buildExpRef();
+}
+function buildExpRef(){
+  const tbl=document.getElementById('expRefTable');
+  const nil='<span style="color:var(--mu)">—</span>';
+  const head='<thead><tr><th>ZIP Range</th><th>RTM P1</th><th>RTM P2</th><th>RTM P3</th><th>ANR P1</th></tr></thead>';
+  const rows=EXP_RULES.map(r=>{
+    const p2=r.rtm.p2?`<span style="color:var(--amb)">${r.rtm.p2}</span>`:nil;
+    const p3=r.rtm.p3?`<span style="color:var(--red)">${r.rtm.p3}</span>${r.isrOnP3?'<span class="dp-isr" style="margin-left:3px">ISR</span>':''}`:nil;
+    return`<tr><td style="font-family:var(--fm)">${r.zipLabel}</td><td style="color:var(--grn);font-weight:600">${r.rtm.p1}</td><td>${p2}</td><td>${p3}</td><td style="color:var(--grn);font-weight:600">${r.anr&&r.anr.p1?r.anr.p1:r.rtm.p1}</td></tr>`;
+  }).join('');
+  tbl.innerHTML=head+`<tbody>${rows}</tbody>`;
+  document.getElementById('expRuleCount').textContent=`${EXP_RULES.length} rules`;
+}
+
+// ══ PRD helpers ══
+function toggleSec(id){document.getElementById(id).classList.toggle('open');}
+let prdAllExp=false;
+function prdExpandAll(){prdAllExp=!prdAllExp;document.querySelectorAll('#page-prd .psec').forEach(s=>s.classList.toggle('open',prdAllExp));document.getElementById('prdExpBtn').textContent=prdAllExp?'Collapse All':'Expand All';}
+function goSec(id){const el=document.getElementById(id);if(!el)return;el.classList.add('open');setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),50);document.querySelectorAll('.snav').forEach(a=>a.classList.remove('active'));const lnk=document.querySelector(`.snav[onclick="goSec('${id}');return false"]`);if(lnk)lnk.classList.add('active');}
+
+// ══ Init ══
+document.getElementById('todayTag').textContent=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+document.getElementById('impETDDate').value=new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
