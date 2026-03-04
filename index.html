@@ -898,7 +898,7 @@ function impRun(){
     if(plan.length){html+=`<div class="imp-section-header plannable fade-in" ${isr.length?'style="margin-top:20px"':''}><span>✓ Targetable Departures — Book Directly</span><span class="imp-section-count">${Math.min(plan.length,3)}</span></div>`;html+=impRenderCards(plan.slice(0,3),false);}
     document.getElementById('impCards').innerHTML=html;
   } else {
-    const plannable=impAll.filter(i=>i.plan);const show=plannable.length>1?plannable.slice(1,4):plannable.slice(0,3);
+    const plannable=impAll.filter(i=>i.plan);const show=plannable.slice(0,3);
     if(!show.length){document.getElementById('impCards').innerHTML='<div class="no-sched">No plannable departures found. Contact inland operations.</div>';return;}
     document.getElementById('impCards').innerHTML=`<div class="imp-section-header plannable fade-in"><span>✓ Available Departures — Plan Directly</span><span class="imp-section-count">${show.length}</span></div>`+impRenderCards(show,false);
   }
