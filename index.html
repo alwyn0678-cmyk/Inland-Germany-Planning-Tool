@@ -610,7 +610,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
           <tr><td class="cid">EC-3</td><td>ZIP not covered</td><td>"Postcode not in matrix. Contact inland team."</td></tr>
           <tr><td class="cid">EC-4</td><td>IMO / Reefer via Duisburg (export)</td><td>ISR warning banner shown — on request only</td></tr>
           <tr><td class="cid">EC-5</td><td>No import rail to Frankenbach/Germersheim</td><td>Only barge options shown for these terminals</td></tr>
-          <tr><td class="cid">EC-6</td><td>Order deadline passed (import)</td><td>ISR section with email template</td></tr>
+          <tr><td class="cid">EC-6</td><td>Order deadline passed (import)</td><td>Still shown as plannable — urgency tags indicate tight timing</td></tr>
         </table></div>
       </div></div>
       <div class="psec" id="s9"><div class="psh" onclick="toggleSec('s9')"><span class="psn">09</span><span class="pst">Assumptions</span><span class="psc">▼</span></div>
@@ -846,11 +846,13 @@ function impComputeInst(sched,vesselETD,vesselTime,port,isFuture,weeks){
     if(depotArr<=termETD)depotArr=addDays(depotArr,7);
     const custDel=nextBizDay(addDays(depotArr,1));
     const orderDL=prevBizDay(addDays(termETD,isFuture?-7:-5));
+    // Skip if order deadline has already passed
+    if(now>=orderDL)continue;
     let custDL=null;
     if(port==='RTM'){const d=termETD.getDay();if(d===0||d===1||d===6){const fri=new Date(termETD);while(fri.getDay()!==5)fri.setDate(fri.getDate()-1);fri.setHours(15,0,0,0);custDL=fri;}else{custDL=addDays(termETD,-1);custDL.setHours(12,0,0,0);}}
     if(port==='RTM'&&custDL){if(isFuture){if(custDL<=vp1||now>=custDL)continue;}else{if(now>=custDL)continue;}}
-    const dsv=Math.round((termETD-vesselETD)/864e5);const plan=now<orderDL;const rec=(dsv>=1&&dsv<=10&&plan);
-    inst.push({mod:sched.mod,etd:termETD,eta:depotArr,custDel,orderDL,custDL,loc:sched.loc,etdDay:sched.etd,etaDay:sched.eta,plan,rec});
+    const dsv=Math.round((termETD-vesselETD)/864e5);const rec=(dsv>=1&&dsv<=10);
+    inst.push({mod:sched.mod,etd:termETD,eta:depotArr,custDel,orderDL,custDL,loc:sched.loc,etdDay:sched.etd,etaDay:sched.eta,rec});
   }
   inst.sort((a,b)=>a.etd-b.etd);
   const seen={},out=[];for(const i of inst){const k=fmtDateISO(i.etd)+'-'+i.mod+'-'+i.loc;if(!seen[k]){seen[k]=1;out.push(i);}}return out;
@@ -914,82 +916,59 @@ function impRun(){
   document.getElementById('impTermInfo').innerHTML=ti;
   // Route map
   document.getElementById('impBanners').innerHTML='';
-  // Cards
+  // Cards — all departures are plannable (no ISR distinction)
   if(isFuture){
-    const plan=impAll.filter(i=>i.plan),isr=impAll.filter(i=>!i.plan);
-    if(!plan.length&&!isr.length){document.getElementById('impCards').innerHTML='<div class="no-sched">No plannable departures found. Contact inland operations.</div>';return;}
-    let html='';
-    if(isr.length){html+=`<div class="imp-section-header isr-needed fade-in"><span>⚡ Nearest Departures — ISR Required</span><span class="imp-section-count">${Math.min(isr.length,2)}</span></div>`;html+=impRenderCards(isr.slice(0,2),true);}
-    if(plan.length){html+=`<div class="imp-section-header plannable fade-in" ${isr.length?'style="margin-top:20px"':''}><span>✓ Targetable Departures — Book Directly</span><span class="imp-section-count">${Math.min(plan.length,3)}</span></div>`;html+=impRenderCards(plan.slice(0,3),false);}
+    const show=impAll.slice(0,5);
+    if(!show.length){document.getElementById('impCards').innerHTML='<div class="no-sched">No plannable departures found. Contact inland operations.</div>';return;}
+    let html=`<div class="imp-section-header plannable fade-in"><span>✓ Available Departures — Book Directly</span><span class="imp-section-count">${show.length}</span></div>`;
+    html+=impRenderCards(show,false);
     document.getElementById('impCards').innerHTML=html;
   } else {
-    const plannable=impAll.filter(i=>i.plan);const show=plannable.slice(0,3);
+    const show=impAll.slice(0,3);
     if(!show.length){document.getElementById('impCards').innerHTML='<div class="no-sched">No plannable departures found. Contact inland operations.</div>';return;}
     document.getElementById('impCards').innerHTML=`<div class="imp-section-header plannable fade-in"><span>✓ Available Departures — Plan Directly</span><span class="imp-section-count">${show.length}</span></div>`+impRenderCards(show,false);
   }
 }
 
-function impRenderCards(scheds,isISR){
+function impRenderCards(scheds){
   let h='<div class="imp-cards">';
   scheds.forEach((s,i)=>{
     const mc=s.mod.toLowerCase()==='barge'?'imp-mode-barge':'imp-mode-rail';
     const tr=Math.round((s.eta-s.etd)/864e5);const odl=dFromNow(s.orderDL);const cdl=s.custDL?dFromNow(s.custDL):null;
-    const cc=isISR?'imp-card isr-card':'imp-card';
-    const sb=isISR?'<span class="imp-status-badge imp-status-isr">ISR NEEDED</span>':'<span class="imp-status-badge imp-status-plannable">PLANNABLE</span>';
     const rb=s.rec?'<span class="imp-rec-badge">★ Recommended</span>':'';
     const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
-    h+=`<div class="${cc} fade-in" style="animation-delay:${i*.08}s">
-      <div class="imp-card-header"><div class="imp-card-htop"><div class="imp-card-hleft"><span class="imp-mode-badge ${mc}">${s.mod}</span><span class="imp-card-depot">${impTName(s.loc)}</span><span class="imp-card-code">${s.loc}</span></div><div>${sb}</div></div>
+    h+=`<div class="imp-card fade-in" style="animation-delay:${i*.08}s">
+      <div class="imp-card-header"><div class="imp-card-htop"><div class="imp-card-hleft"><span class="imp-mode-badge ${mc}">${s.mod}</span><span class="imp-card-depot">${impTName(s.loc)}</span><span class="imp-card-code">${s.loc}</span></div><div><span class="imp-status-badge imp-status-plannable">PLANNABLE</span></div></div>
       <div class="imp-card-hmeta"><span class="imp-transit-badge">${tr}d transit</span>${rb}</div></div>
       <div class="imp-card-body">
         <div class="imp-card-row"><span class="imp-card-label">Terminal ETD</span><span class="imp-card-value" style="color:var(--blue)">${fmt(s.etd)}</span></div>
         <div class="imp-card-row"><span class="imp-card-label">Depot Arrival</span><span class="imp-card-value">${fmt(s.eta)}</span></div>
         <div class="imp-card-row"><span class="imp-card-label">Customer Delivery</span><span class="imp-card-value" style="color:var(--grn)">${fmt(s.custDel)}${s.loc==='DEDUI01'?' <span style="font-size:10px;color:var(--amb)">after 12:00</span>':''}</span></div>
-        <div class="imp-card-row"><span class="imp-card-label">Order Deadline</span><span class="imp-card-value${isISR?' style="color:var(--red)"':''}">${fmt(s.orderDL)} ${urgTag(odl)}</span></div>
+        <div class="imp-card-row"><span class="imp-card-label">Order Deadline</span><span class="imp-card-value">${fmt(s.orderDL)} ${urgTag(odl)}</span></div>
         ${impPort==='RTM'&&s.custDL?`<div class="imp-card-row"><span class="imp-card-label">Customs Deadline</span><span class="imp-card-value" style="color:var(--amb)">${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')} ${urgTag(cdl)}</span></div>`:''}
       </div>
-      ${isISR?`<div class="imp-card-note isr-note">📋 TO deadline passed — raise ISR to check availability on this ${s.mod.toLowerCase()}</div>`
-        :`<div class="imp-card-note transport-note">📝 Remarks: <code>Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>`}
+      <div class="imp-card-note transport-note">📝 Remarks: <code>Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>
       ${impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'?`<div class="imp-card-note dui-note">📧 Always send copy of Customs document to <strong>nlaopsinlrbc@maersk.com</strong> <span style="color:var(--red);font-weight:700">(DO NOT send this to us)</span></div>
       <div class="imp-card-note dui-note">📦 When multistop is needed, please send ATA at least <strong>2 days before</strong> customer Delivery date</div>`:''}
       <div class="imp-card-footer"><span class="imp-card-vendor">Truck: ${impTruckForTerm(s.loc)}</span><div class="imp-card-btns">
-        ${isISR?`<button class="copy-btn" onclick="impCopyISR(${i},this)">📧 Copy ISR</button>`:''}
-        <button class="copy-btn" onclick="impCopySummary(${i},${isISR},this)">⎘ Copy Summary</button>
+        <button class="copy-btn" onclick="impCopySummary(${i},this)">⎘ Copy Summary</button>
       </div></div></div>`;
   });
   return h+'</div>';
 }
 
-function impCopySummary(idx,isISR,btn){
-  let list;
-  if(impIsFuture){list=isISR?impAll.filter(i=>!i.plan).slice(0,2):impAll.filter(i=>i.plan).slice(0,3);}
-  else{const pl=impAll.filter(i=>i.plan);list=pl.slice(0,3);}
-  const s=list[idx];if(!s)return;const pn=impPort==='RTM'?'Rotterdam':'Antwerp';
+function impCopySummary(idx,btn){
+  const show=impIsFuture?impAll.slice(0,5):impAll.slice(0,3);
+  const s=show[idx];if(!s)return;const pn=impPort==='RTM'?'Rotterdam':'Antwerp';
   const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
-  let t=`IMPORT INLAND PLAN\nStatus: ${isISR?'ISR REQUIRED':'PLANNABLE'}${s.rec?' - RECOMMENDED':''}\nPort: ${pn}\nTerminal: ${impTName(s.loc)} (${s.loc})\nMode: ${s.mod} (${s.etdDay} schedule)\nTerminal ETD: ${fmt(s.etd)}\nDepot Arrival: ${fmt(s.eta)}\nCustomer Delivery: ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\nOrder Deadline: ${fmt(s.orderDL)}\n`;
+  let t=`IMPORT INLAND PLAN\nStatus: PLANNABLE${s.rec?' - RECOMMENDED':''}\nPort: ${pn}\nTerminal: ${impTName(s.loc)} (${s.loc})\nMode: ${s.mod} (${s.etdDay} schedule)\nTerminal ETD: ${fmt(s.etd)}\nDepot Arrival: ${fmt(s.eta)}\nCustomer Delivery: ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\nOrder Deadline: ${fmt(s.orderDL)}\n`;
   if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline: ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
   t+=`Truck Vendor: ${impTruckForTerm(s.loc)}\n`;
-  if(isISR)t+=`\nAction: Raise ISR to check availability on this ${s.mod.toLowerCase()}\n`;
-  else t+=`\nTransport Order Remarks: Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}\n`;
+  t+=`\nTransport Order Remarks: Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}\n`;
   if(impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'){
     t+=`\n⚠ DUISBURG REMINDERS\n- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)\n- When multistop is needed, send ATA at least 2 days before customer Delivery date\n`;
   }
   copyText(t,btn,'⎘ Copy Summary');
-}
-
-function impCopyISR(idx,btn){
-  const list=impAll.filter(i=>!i.plan).slice(0,2);const s=list[idx];if(!s)return;
-  const pn=impPort==='RTM'?'Rotterdam':'Antwerp';const terminal=impPort==='RTM'?'Rotterdam':'Antwerpen';
-  const zip=document.getElementById('impZip').value.trim();const size=document.getElementById('impSize').value;
-  const type=document.getElementById('impType').value;const region=getRegion(zip);
-  let t=`Subject: ISR Request - ${s.mod} ${fmt(s.etd)} to ${s.loc} ${impTName(s.loc)}\n\nHi,\n\nCould you please check availability on the below ${s.mod.toLowerCase()} departure? The transport order deadline has passed.\n\nREQUESTED ${s.mod.toUpperCase()}\n${s.mod} ETD:         ${fmt(s.etd)}\n${s.mod} ETA:         ${fmt(s.eta)}\nSchedule:            ${s.etdDay} departure (${terminal})\nCustomer Delivery:   ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\n\nROUTE\nDischarge Port:      ${pn}\nDeparture Terminal:  ${terminal}\nInland Depot:        ${s.loc} - ${impTName(s.loc)}\nDelivery Postcode:   ${zip} (${region})\n\nCONTAINER DETAILS\nContainer Size:      ${size}'\nContainer Type:      ${type}\n\nDEADLINE STATUS\nOrder Deadline:      ${fmt(s.orderDL)} - PASSED\n`;
-  if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline:    ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
-  t+=`\nCould you confirm if there is still space available on this ${s.mod.toLowerCase()} (${s.etdDay} from ${terminal})?\n`;
-  if(impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'){
-    t+=`\nDuisburg Reminders:\n- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)\n- When multistop is needed, send ATA at least 2 days before customer Delivery date\n`;
-  }
-  t+=`\nThank you.\n`;
-  copyText(t,btn,'📧 Copy ISR');
 }
 
 // Import ref table
