@@ -1175,7 +1175,7 @@ function expSelectDepot(code){
 function expBargeCard(dep,yot,ctx){
   const modIcon=dep.mod==='Rail'?'🚂':'🛳';
   const ccoMin=addDays(dep.eat,dep.buffer||2);const latestETA=addDays(dep.eat,yot-1);
-  const orderDL=prevBizDay(addDays(dep.etd,-7));
+  const orderDL=prevBizDay(addDays(dep.etd,-5));
   const odl=dFromNow(orderDL);
   const recBadge=dep.isRecommended?'<div class="bc-rec-badge">✓ Recommended</div>':'';
   const cutoffNote=dep.nextDayCutoff?'<div class="bc-cutoff-note">⏰ Load before 12:00 to make this departure</div>':'';
