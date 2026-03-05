@@ -208,6 +208,7 @@ table.reft{width:100%;border-collapse:collapse;font-size:12px;}
 .imp-card-note{margin:0 16px 8px;padding:6px 10px;border-radius:4px;font-family:var(--fm);font-size:11px;font-weight:500;}
 .imp-card-note.isr-note{background:var(--ab);border:1px solid var(--abd);color:#7A5D00;}
 .imp-card-note.transport-note{background:var(--gb);border:1px solid var(--gbd);color:#2E7D32;}
+.imp-card-note.dui-note{background:#e8f0fe;border:1px solid #c5d7f2;color:#1a3a6b;}
 .imp-card-note code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;font-family:var(--fm);font-size:11px;font-weight:600;}
 .imp-card-footer{padding:8px 16px;background:var(--s2);border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
 .imp-card.isr-card .imp-card-footer{background:var(--ab);}
@@ -949,6 +950,8 @@ function impRenderCards(scheds,isISR){
       </div>
       ${isISR?`<div class="imp-card-note isr-note">📋 TO deadline passed — raise ISR to check availability on this ${s.mod.toLowerCase()}</div>`
         :`<div class="imp-card-note transport-note">📝 Remarks: <code>Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>`}
+      ${impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'?`<div class="imp-card-note dui-note">📧 Always send copy of Customs document to <strong>nlaopsinlrbc@maersk.com</strong> <span style="color:var(--red);font-weight:700">(DO NOT send this to us)</span></div>
+      <div class="imp-card-note dui-note">📦 When multistop is needed, please send ATA at least <strong>2 days before</strong> customer Delivery date</div>`:''}
       <div class="imp-card-footer"><span class="imp-card-vendor">Truck: ${impTruckForTerm(s.loc)}</span><div class="imp-card-btns">
         ${isISR?`<button class="copy-btn" onclick="impCopyISR(${i},this)">📧 Copy ISR</button>`:''}
         <button class="copy-btn" onclick="impCopySummary(${i},${isISR},this)">⎘ Copy Summary</button>
@@ -968,6 +971,9 @@ function impCopySummary(idx,isISR,btn){
   t+=`Truck Vendor: ${impTruckForTerm(s.loc)}\n`;
   if(isISR)t+=`\nAction: Raise ISR to check availability on this ${s.mod.toLowerCase()}\n`;
   else t+=`\nTransport Order Remarks: Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}\n`;
+  if(impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'){
+    t+=`\n⚠ DUISBURG REMINDERS\n- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)\n- When multistop is needed, send ATA at least 2 days before customer Delivery date\n`;
+  }
   copyText(t,btn,'⎘ Copy Summary');
 }
 
@@ -978,7 +984,11 @@ function impCopyISR(idx,btn){
   const type=document.getElementById('impType').value;const region=getRegion(zip);
   let t=`Subject: ISR Request - ${s.mod} ${fmt(s.etd)} to ${s.loc} ${impTName(s.loc)}\n\nHi,\n\nCould you please check availability on the below ${s.mod.toLowerCase()} departure? The transport order deadline has passed.\n\nREQUESTED ${s.mod.toUpperCase()}\n${s.mod} ETD:         ${fmt(s.etd)}\n${s.mod} ETA:         ${fmt(s.eta)}\nSchedule:            ${s.etdDay} departure (${terminal})\nCustomer Delivery:   ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\n\nROUTE\nDischarge Port:      ${pn}\nDeparture Terminal:  ${terminal}\nInland Depot:        ${s.loc} - ${impTName(s.loc)}\nDelivery Postcode:   ${zip} (${region})\n\nCONTAINER DETAILS\nContainer Size:      ${size}'\nContainer Type:      ${type}\n\nDEADLINE STATUS\nOrder Deadline:      ${fmt(s.orderDL)} - PASSED\n`;
   if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline:    ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
-  t+=`\nCould you confirm if there is still space available on this ${s.mod.toLowerCase()} (${s.etdDay} from ${terminal})?\n\nThank you.\n`;
+  t+=`\nCould you confirm if there is still space available on this ${s.mod.toLowerCase()} (${s.etdDay} from ${terminal})?\n`;
+  if(impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'){
+    t+=`\nDuisburg Reminders:\n- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)\n- When multistop is needed, send ATA at least 2 days before customer Delivery date\n`;
+  }
+  t+=`\nThank you.\n`;
   copyText(t,btn,'📧 Copy ISR');
 }
 
