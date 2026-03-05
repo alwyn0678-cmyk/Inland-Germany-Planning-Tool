@@ -1024,7 +1024,17 @@ const EXP_DEPOTS={
 const EXP_TERM_NAMES={'NLROTTM':'APM Terminals Rotterdam','NLROTWG':'Rotterdam World Gateway','NLROT01':'Hutchison Ports Delta II','NLROT21':'ECT Delta Terminal','BEANT869':'PSA Europa Terminal','BEANT913':'PSA Noordzee Terminal'};
 
 const EXP_SCHED={
-  'DEDUI01':{RTM:[{mod:'Rail',dep:4,transit:1,buffer:2},{mod:'Rail',dep:7,transit:2,buffer:2}],ANR:[{mod:'Barge',dep:3,transit:2,buffer:2},{mod:'Barge',dep:5,transit:3,buffer:2}]},
+  // DEDUI01 Hutchison Ports Duisburg — Rail (existing) + Barge (Nextlogic window, appended)
+  // Rail RTM: Thu dep → transit 1d, Sun dep → transit 2d
+  // Barge RTM (Nextlogic): Mon-Wed window → Thu arrival, Wed-Fri → Sat, Fri-Sun → Mon
+  //   All RTM barges serve: ECT Delta (NLROT21) / Delta II (NLROT01) / RWG (NLROTWG) / APMT-2 (NLROTTM)
+  // Barge ANR: Mon-Tue window → Fri arrival, Wed-Thu → Tue
+  'DEDUI01':{RTM:[
+    {mod:'Rail',dep:4,transit:1,buffer:2},{mod:'Rail',dep:7,transit:2,buffer:2},
+    {mod:'Barge',dep:3,transit:1,buffer:2},{mod:'Barge',dep:5,transit:1,buffer:2},{mod:'Barge',dep:7,transit:1,buffer:2}
+  ],ANR:[
+    {mod:'Barge',dep:2,transit:3,buffer:2},{mod:'Barge',dep:4,transit:5,buffer:2}
+  ]},
   'DEBNX01':{RTM:[{mod:'Barge',dep:2,transit:3,buffer:2},{mod:'Barge',dep:6,transit:2,buffer:2}],ANR:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:6,transit:2,buffer:2}]},
   'DEAJHRA':{RTM:[{mod:'Barge',dep:6,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:2,transit:4,buffer:1}]},
   'DEGRH01':{RTM:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:7,transit:4,buffer:1},{mod:'Barge',dep:3,transit:4,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
@@ -1163,6 +1173,8 @@ function expSelectDepot(code){
     const noSchedDepots=['DEMUN01','DETREAZ','DEDTM01'];
     bargeList.innerHTML=skipN+(noSchedDepots.includes(code)?`<div class="no-sched-isr">📋 Schedule not yet available for <strong>${name}</strong>. Please raise an ISR.</div>`:`<div class="no-sched">No departures available for <strong>${code}</strong> within the planning window.</div>`);
   } else {
+    // Sort: Rail first, then by date
+    deps.sort((a,b)=>{if(a.mod!==b.mod){return a.mod==='Rail'?-1:1;}return a.etd-b.etd;});
     deps[0].isRecommended=true;
     let skipN='';if(skipped.length){const s=skipped[0];skipN=`<div class="bc-skipped">${s.mod==='Rail'?'🚂':'🛳'} <strong>${s.mod} on ${fmtS(s.etd)}</strong> skipped — loading after 12:00 is too late.</div>`;}
     const termName=EXP_TERM_NAMES[termCode]||termCode;const zip2=document.getElementById('expZip').value;
