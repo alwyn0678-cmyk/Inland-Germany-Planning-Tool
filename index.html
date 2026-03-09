@@ -796,7 +796,8 @@ function renderEmptyDepotHTML(depot, direction) {
       rows += `<div class="empty-depot-row"><span class="edp-rank edp-alt">2</span><span class="edp-code">${depot.p2}</span><span class="edp-name">${depot.p2n}</span><span style="font-family:var(--fm);font-size:9px;color:var(--amb);font-weight:700;margin-left:auto">2ND OPTION</span></div>`;
     }
   }
-  return `<div class="empty-depot-section"><div class="empty-depot-ttl">${title}</div>${rows}</div>`;
+  const expNote = direction === 'export' ? `<div style="margin-top:8px;padding:8px 10px;background:#fff8e1;border:1px solid #f6c878;border-radius:4px;font-family:var(--fm);font-size:10px;color:#7c5400;line-height:1.5"><strong>Note:</strong> We always highly recommend the preferred depot to optimize our transports and to be as cost-saving as possible. If any of these options are not available, please delay transport until there is equipment or reach out to <strong>INLAND OPS</strong>.</div>` : '';
+  return `<div class="empty-depot-section"><div class="empty-depot-ttl">${title}</div>${rows}${expNote}</div>`;
 }
 
 // ══ Reset / New Search ══
