@@ -215,6 +215,28 @@ table.reft{width:100%;border-collapse:collapse;font-size:12px;}
 .imp-card-vendor{font-family:var(--fm);font-size:10px;color:var(--mu);font-weight:500;}
 .imp-card-btns{display:flex;gap:6px;}
 
+/* ═══ PROMINENT MODALITY BANNER ═══ */
+.modality-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;font-family:var(--fc);font-size:18px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.modality-banner.mod-barge{background:linear-gradient(135deg,#e8f2fb 0%,#cce0f5 100%);color:#0a4a8a;border-bottom:3px solid #2980d4;}
+.modality-banner.mod-rail{background:linear-gradient(135deg,#f3e8ff 0%,#e4d2f7 100%);color:#5b21a8;border-bottom:3px solid #7c3aed;}
+.modality-banner .mod-icon{font-size:24px;}
+.modality-banner .mod-label{flex:1;}
+.modality-banner .mod-transit{font-family:var(--fm);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.04em;}
+.modality-banner.mod-barge .mod-transit{background:rgba(10,74,138,.12);color:#0a4a8a;}
+.modality-banner.mod-rail .mod-transit{background:rgba(91,33,168,.12);color:#5b21a8;}
+
+/* ═══ EMPTY DEPOT INFO ═══ */
+.empty-depot-section{margin:0 16px 8px;padding:10px 14px;border-radius:6px;background:#f0f4ff;border:1px solid #c5d3f0;}
+.empty-depot-ttl{font-family:var(--fc);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#3a5a9c;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.empty-depot-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-family:var(--fm);font-size:11px;}
+.empty-depot-row:not(:last-child){border-bottom:1px solid rgba(197,211,240,.5);}
+.edp-rank{font-size:9px;font-weight:800;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;}
+.edp-rank.edp-pref{background:#0e7a4a;}
+.edp-rank.edp-alt{background:#b45309;}
+.edp-code{font-weight:700;color:#1a3a6b;}
+.edp-name{color:var(--mu);font-size:10px;}
+.edp-request{color:var(--red);font-weight:700;font-size:11px;}
+
 /* ═══════════════════════════════════
    EXPORT-SPECIFIC STYLES
    ═══════════════════════════════════ */
@@ -233,10 +255,9 @@ table.reft{width:100%;border-collapse:collapse;font-size:12px;}
 
 /* Export barge cards */
 .barge-list{display:flex;flex-direction:column;gap:10px;}
-.bc{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;display:flex;align-items:stretch;}
-.bc-accent{width:5px;flex-shrink:0;}
-.bc-accent.barge{background:#1a56a0;}.bc-accent.rail{background:var(--grn);}
-.bc-body{flex:1;display:flex;align-items:center;gap:0;flex-wrap:wrap;}
+.bc{background:var(--s);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;}
+.bc-accent{width:100%;height:0;flex-shrink:0;}
+.bc-body{flex:1;display:flex;align-items:stretch;gap:0;flex-wrap:wrap;}
 .bc-dep{padding:16px 20px;min-width:180px;border-right:1px solid var(--bd);}
 .bc-dep-tag{font-family:var(--fm);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--mu);margin-bottom:4px;}
 .bc-dep-date{font-family:var(--fc);font-size:22px;font-weight:700;line-height:1.1;}
@@ -263,6 +284,19 @@ table.reft{width:100%;border-collapse:collapse;font-size:12px;}
 .win-item-sub{font-family:var(--fm);font-size:10px;color:var(--mu);margin-top:3px;}
 .bc-recommended{border-color:var(--gbd);}
 .deduirr-banner{display:flex;align-items:center;gap:10px;padding:11px 16px;margin-bottom:16px;background:var(--rb);border:1px solid var(--rbd);border-left:5px solid var(--red);border-radius:var(--r);font-family:var(--fc);font-size:15px;font-weight:700;color:var(--red);letter-spacing:.02em;}
+
+/* Export modality banner */
+.exp-mod-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;font-family:var(--fc);font-size:18px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:var(--r) var(--r) 0 0;}
+.exp-mod-banner.exp-barge{background:linear-gradient(135deg,#e8f2fb 0%,#cce0f5 100%);color:#0a4a8a;border-bottom:3px solid #2980d4;}
+.exp-mod-banner.exp-rail{background:linear-gradient(135deg,#f3e8ff 0%,#e4d2f7 100%);color:#5b21a8;border-bottom:3px solid #7c3aed;}
+.exp-mod-banner .exp-mod-icon{font-size:24px;}
+.exp-mod-banner .exp-mod-transit{font-family:var(--fm);font-size:11px;font-weight:600;padding:3px 10px;border-radius:4px;letter-spacing:.04em;margin-left:auto;}
+.exp-mod-banner.exp-barge .exp-mod-transit{background:rgba(10,74,138,.12);color:#0a4a8a;}
+.exp-mod-banner.exp-rail .exp-mod-transit{background:rgba(91,33,168,.12);color:#5b21a8;}
+
+/* Export empty depot section */
+.exp-empty-depot{margin-top:12px;padding:10px 14px;border-radius:6px;background:#f0f4ff;border:1px solid #c5d3f0;}
+.exp-empty-depot .empty-depot-ttl{font-family:var(--fc);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#3a5a9c;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 
 /* ═══ PRD TAB ═══ */
 .prdlyt{display:grid;grid-template-columns:200px 1fr;gap:0;flex:1;max-width:1060px;width:100%;margin:0 auto;padding:26px 24px 60px;align-items:start;}
@@ -323,6 +357,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
   .imp-summary-bar{gap:10px;}.imp-summary-divider{display:none;}.top .tsep,.top .tmod{display:none;}
   .dir-tab{padding:8px 16px;font-size:14px;}.dir-tab .dir-sub{display:none;}.dir-tab .dir-icon{font-size:16px;}
   .tnav{padding:0 12px;}.tnav-main{gap:2px;}
+  .modality-banner{font-size:15px;padding:8px 12px;}.modality-banner .mod-icon{font-size:20px;}
 }
 </style>
 </head>
@@ -351,7 +386,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
     </button>
   </div>
   <div class="tnav-secondary">
-    <button class="spec-tab" id="tab-prd" onclick="switchTab('prd')">📋 Spec v2.0</button>
+    <button class="spec-tab" id="tab-prd" onclick="switchTab('prd')" style="display:none">📋 Spec v2.0</button>
   </div>
 </div>
 
@@ -491,6 +526,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
           <div class="banner-sub">IMO and Reefer containers via Duisburg are on request only. CX must raise an ISR before booking.</div>
         </div>
       </div>
+      <div id="expEmptyDepotInfo" style="display:none"></div>
       <div class="section-ttl" id="expBargeTitle" style="display:none"></div>
       <div class="barge-list" id="expBargeList"></div>
       <div class="refsec">
@@ -630,7 +666,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
   <div class="fi">Import + Export Planner</div>
   <span class="fsep">·</span><div class="fi">Internal only</div>
   <span class="fsep">·</span><div class="fi">Schedules valid as of <span class="fv">Mar 2026</span></div>
-  <span class="fsep">·</span><div class="fi">v<span class="fv">2.0</span></div>
+  <span class="fsep">·</span><div class="fi">v<span class="fv">2.1</span></div>
 </footer>
 
 <script>
@@ -667,6 +703,102 @@ function copyText(text,btn,label){
 }
 function fbCopy(text){const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}
 
+// ══════════════════════════════════════════════════════
+// EMPTY CONTAINER DEPOT DATA
+// ══════════════════════════════════════════════════════
+// Structure: EMPTY_DEPOTS[sizeType] = array of {lo, hi, rtm:{p1,p1n,p2,p2n}, anr:{p1,p1n,p2,p2n}}
+// sizeType: '40dchc' | '20' | '40reefer'
+const EMPTY_DEPOTS = {
+  '40dchc': [
+    {lo:0,hi:34999,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEDUI03',p2n:'DIT Depot'},anr:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:null,p2n:null}},
+    {lo:35000,hi:36999,rtm:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:'DEG4TG',p2n:'Gustavsburg Contargo'},anr:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:'DEG4TG',p2n:'Gustavsburg Contargo'}},
+    {lo:40000,hi:52999,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEDUI03',p2n:'DIT Depot'},anr:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:null,p2n:null}},
+    {lo:53000,hi:53999,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEBNX01',p2n:'Bonn AZS'},anr:{p1:'DEBNX01',p1n:'Bonn AZS',p2:null,p2n:null}},
+    {lo:54000,hi:54999,rtm:{p1:'DETREAZ',p1n:'Trier AZS',p2:'DEBNX01',p2n:'Am Zehnhoff Bonn'},anr:{p1:'DETREAZ',p1n:'Trier AZS',p2:null,p2n:null}},
+    {lo:55000,hi:55999,rtm:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null},anr:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null}},
+    {lo:56000,hi:56999,rtm:{p1:'DEBNX01',p1n:'Bonn AZS',p2:null,p2n:null},anr:{p1:'DEBNX01',p1n:'Bonn AZS',p2:null,p2n:null}},
+    {lo:57000,hi:60000,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEDUI03',p2n:'DIT Depot'},anr:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:null,p2n:null}},
+    {lo:60000,hi:65999,rtm:{p1:'DEG4TG',p1n:'Gustavsburg Contargo',p2:'DEMNZ01',p2n:'Mainz Frankenbach'},anr:{p1:'DEG4TG',p1n:'Gustavsburg Contargo',p2:'DEMNZ01',p2n:'Mainz Frankenbach'}},
+    {lo:66000,hi:79999,rtm:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null},anr:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null}},
+    {lo:80000,hi:87999,rtm:{p1:'DEMUN01',p1n:'Muenchen',p2:null,p2n:null},anr:{p1:'DEMUN01',p1n:'Muenchen',p2:null,p2n:null}},
+    {lo:88000,hi:89999,rtm:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null},anr:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null}},
+    {lo:90000,hi:99000,rtm:{p1:'DENUE02',p1n:'Nuernberg CDN',p2:null,p2n:null},anr:{p1:'DENUE02',p1n:'Nuernberg CDN',p2:null,p2n:null}},
+  ],
+  '20': [
+    {lo:0,hi:34999,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEDUI03',p2n:'DIT Depot'},anr:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:null,p2n:null}},
+    {lo:35000,hi:36999,rtm:{p1:'DEAJHRA',p1n:'Rheinhafen Andernach',p2:'DEBNX01',p2n:'Bonn AZS'},anr:{p1:'DEAJHRA',p1n:'Rheinhafen Andernach',p2:'DEBNX01',p2n:'Bonn AZS'}},
+    {lo:40000,hi:52999,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEDUI03',p2n:'DIT Depot'},anr:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:null,p2n:null}},
+    {lo:53000,hi:53999,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEBNX01',p2n:'Bonn AZS'},anr:{p1:'DEBNX01',p1n:'Bonn AZS',p2:null,p2n:null}},
+    {lo:54000,hi:54999,rtm:{p1:'DETREAZ',p1n:'Trier AZS',p2:'DEAJHRA',p2n:'Rheinhafen Andernach'},anr:{p1:'DETREAZ',p1n:'Trier AZS',p2:null,p2n:null}},
+    {lo:55000,hi:55999,rtm:{p1:'DEG4TG',p1n:'Gustavsburg Contargo',p2:'DEAJHRA',p2n:'Rheinhafen Andernach'},anr:{p1:'DEG4TG',p1n:'Gustavsburg Contargo',p2:'DEAJHRA',p2n:'Rheinhafen Andernach'}},
+    {lo:56000,hi:56999,rtm:{p1:'DEAJHRA',p1n:'Rheinhafen Andernach',p2:'DEBNX01',p2n:'Bonn AZS'},anr:{p1:'DEAJHRA',p1n:'Rheinhafen Andernach',p2:'DEBNX01',p2n:'Bonn AZS'}},
+    {lo:57000,hi:60000,rtm:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:'DEDUI03',p2n:'DIT Depot'},anr:{p1:'DEDUI01',p1n:'Hutchison Ports Duisburg',p2:null,p2n:null}},
+    {lo:60000,hi:65999,rtm:{p1:'DEG4TG',p1n:'Gustavsburg Contargo',p2:'DEAJHRA',p2n:'Rheinhafen Andernach'},anr:{p1:'DEG4TG',p1n:'Gustavsburg Contargo',p2:'DEAJHRA',p2n:'Rheinhafen Andernach'}},
+    {lo:66000,hi:79999,rtm:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null},anr:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null}},
+    {lo:80000,hi:87999,rtm:{p1:'DEMUN01',p1n:'Muenchen',p2:null,p2n:null},anr:{p1:'DEMUN01',p1n:'Muenchen',p2:null,p2n:null}},
+    {lo:88000,hi:89999,rtm:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null},anr:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null}},
+    {lo:90000,hi:99000,rtm:{p1:'DENUE02',p1n:'Nuernberg CDN',p2:null,p2n:null},anr:{p1:'DENUE02',p1n:'Nuernberg CDN',p2:null,p2n:null}},
+  ],
+  '40reefer': [
+    {lo:0,hi:34999,rtm:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null},anr:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null}},
+    {lo:35000,hi:36999,rtm:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null},anr:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null}},
+    {lo:40000,hi:52999,rtm:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null},anr:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null}},
+    {lo:53000,hi:53999,rtm:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null},anr:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null}},
+    {lo:54000,hi:54999,rtm:{p1:'DETREAZ',p1n:'Trier AZS',p2:'DEBNX01',p2n:'Am Zehnhoff Bonn'},anr:{p1:'DETREAZ',p1n:'Trier AZS',p2:null,p2n:null}},
+    {lo:55000,hi:55999,rtm:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null},anr:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null}},
+    {lo:56000,hi:56999,rtm:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null},anr:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null}},
+    {lo:57000,hi:60000,rtm:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null},anr:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null}},
+    {lo:60000,hi:65999,rtm:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null},anr:{p1:'DEMNZ01',p1n:'Mainz Frankenbach',p2:null,p2n:null}},
+    {lo:66000,hi:79999,rtm:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null},anr:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null}},
+    {lo:80000,hi:87999,rtm:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null},anr:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null}},
+    {lo:88000,hi:89999,rtm:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null},anr:{p1:'DEGRH01',p1n:'Germersheim DPW',p2:null,p2n:null}},
+    {lo:90000,hi:99000,rtm:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null},anr:{p1:'REQUEST',p1n:'Request Inland Ops',p2:null,p2n:null}},
+  ]
+};
+
+// Determine size type key from size+type selections
+function getEmptySizeType(size, type) {
+  // type values: dry, high, href (import reefer), reefer (export reefer), imo
+  if (type === 'reefer' || type === 'href') return '40reefer';
+  if (size === '20') return '20';
+  return '40dchc'; // 40' dry, high cube, 45'
+}
+
+function getEmptySizeLabel(size, type) {
+  if (type === 'reefer' || type === 'href') return "40' Reefer";
+  if (size === '20') return "20'";
+  return "40' DC/HC";
+}
+
+// Lookup empty depot for a given zip, size type, port
+function lookupEmptyDepot(zip, sizeType, port) {
+  const z = parseInt(zip, 10);
+  const table = EMPTY_DEPOTS[sizeType];
+  if (!table) return null;
+  for (const row of table) {
+    if (z >= row.lo && z <= row.hi) {
+      return port === 'ANR' ? row.anr : row.rtm;
+    }
+  }
+  return null;
+}
+
+// Render empty depot HTML section
+function renderEmptyDepotHTML(depot, direction) {
+  if (!depot) return '';
+  const title = direction === 'import' ? '📦 Empty Return Depot' : '📦 Empty Container Release';
+  let rows = '';
+  if (depot.p1 === 'REQUEST') {
+    rows = `<div class="empty-depot-row"><span class="edp-request">⚠ REQUEST INLAND OPS — Contact inland team for empty depot assignment</span></div>`;
+  } else {
+    rows += `<div class="empty-depot-row"><span class="edp-rank edp-pref">1</span><span class="edp-code">${depot.p1}</span><span class="edp-name">${depot.p1n}</span><span style="font-family:var(--fm);font-size:9px;color:var(--grn);font-weight:700;margin-left:auto">PREFERRED</span></div>`;
+    if (depot.p2) {
+      rows += `<div class="empty-depot-row"><span class="edp-rank edp-alt">2</span><span class="edp-code">${depot.p2}</span><span class="edp-name">${depot.p2n}</span><span style="font-family:var(--fm);font-size:9px;color:var(--amb);font-weight:700;margin-left:auto">2ND OPTION</span></div>`;
+    }
+  }
+  return `<div class="empty-depot-section"><div class="empty-depot-ttl">${title}</div>${rows}</div>`;
+}
+
 // ══ Reset / New Search ══
 function resetTool(){
   // Reset Import
@@ -697,6 +829,8 @@ function resetTool(){
   document.getElementById('expImoReeferBanner').style.display='none';
   document.getElementById('expBargeTitle').style.display='none';
   document.getElementById('expBargeList').innerHTML='';
+  document.getElementById('expEmptyDepotInfo').style.display='none';
+  document.getElementById('expEmptyDepotInfo').innerHTML='';
   // Scroll to top
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -860,6 +994,8 @@ function impComputeInst(sched,vesselETD,vesselTime,port,isFuture,weeks){
 
 // Import state
 let impTerms=null,impAll=[],impPort='',impETD=null,impTime='',impIsFuture=true;
+// Store for empty depot lookup
+let impZipVal='',impSizeVal='',impTypeVal='';
 
 function impRun(){
   const zip=document.getElementById('impZip').value.trim();
@@ -871,6 +1007,7 @@ function impRun(){
   const vesselETD=parseDate(etdStr);const now=new Date();now.setHours(0,0,0,0);
   const isFuture=vesselETD>now;
   impPort=port;impETD=vesselETD;impTime=etdTime;impIsFuture=isFuture;
+  impZipVal=zip;impSizeVal=size;impTypeVal=type;
   const terms=impLookupTerms(zip,port);
   document.getElementById('impEmpty').style.display='none';
   document.getElementById('impResult').style.display='block';
@@ -933,15 +1070,23 @@ function impRun(){
 }
 
 function impRenderCards(scheds){
+  // Get empty depot info
+  const sizeType = getEmptySizeType(impSizeVal, impTypeVal);
+  const emptyDepot = lookupEmptyDepot(impZipVal, sizeType, impPort);
+  const emptyDepotHTML = renderEmptyDepotHTML(emptyDepot, 'import');
+
   let h='<div class="imp-cards">';
   scheds.forEach((s,i)=>{
-    const mc=s.mod.toLowerCase()==='barge'?'imp-mode-barge':'imp-mode-rail';
+    const isBarge = s.mod.toLowerCase()==='barge';
+    const modClass = isBarge ? 'mod-barge' : 'mod-rail';
+    const modIcon = isBarge ? '🛳' : '🚂';
     const tr=Math.round((s.eta-s.etd)/864e5);const odl=dFromNow(s.orderDL);const cdl=s.custDL?dFromNow(s.custDL):null;
     const rb=s.rec?'<span class="imp-rec-badge">★ Recommended</span>':'';
     const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
     h+=`<div class="imp-card fade-in" style="animation-delay:${i*.08}s">
-      <div class="imp-card-header"><div class="imp-card-htop"><div class="imp-card-hleft"><span class="imp-mode-badge ${mc}">${s.mod}</span><span class="imp-card-depot">${impTName(s.loc)}</span><span class="imp-card-code">${s.loc}</span></div><div><span class="imp-status-badge imp-status-plannable">PLANNABLE</span></div></div>
-      <div class="imp-card-hmeta"><span class="imp-transit-badge">${tr}d transit</span>${rb}</div></div>
+      <div class="modality-banner ${modClass}"><span class="mod-icon">${modIcon}</span><span class="mod-label">${s.mod}</span><span class="mod-transit">${tr}d transit</span></div>
+      <div class="imp-card-header"><div class="imp-card-htop"><div class="imp-card-hleft"><span class="imp-card-depot">${impTName(s.loc)}</span><span class="imp-card-code">${s.loc}</span></div><div><span class="imp-status-badge imp-status-plannable">PLANNABLE</span></div></div>
+      <div class="imp-card-hmeta">${rb}</div></div>
       <div class="imp-card-body">
         <div class="imp-card-row"><span class="imp-card-label">Terminal ETD</span><span class="imp-card-value" style="color:var(--blue)">${fmt(s.etd)}</span></div>
         <div class="imp-card-row"><span class="imp-card-label">Depot Arrival</span><span class="imp-card-value">${fmt(s.eta)}</span></div>
@@ -949,6 +1094,7 @@ function impRenderCards(scheds){
         <div class="imp-card-row"><span class="imp-card-label">Order Deadline</span><span class="imp-card-value">${fmt(s.orderDL)} ${urgTag(odl)}</span></div>
         ${impPort==='RTM'&&s.custDL?`<div class="imp-card-row"><span class="imp-card-label">Customs Deadline</span><span class="imp-card-value" style="color:var(--amb)">${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')} ${urgTag(cdl)}</span></div>`:''}
       </div>
+      ${emptyDepotHTML}
       <div class="imp-card-note transport-note">📝 Remarks: <code>Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>
       ${impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'?`<div class="imp-card-note dui-note">📧 Always send copy of Customs document to <strong>nlaopsinlrbc@maersk.com</strong> <span style="color:var(--red);font-weight:700">(DO NOT send this to us)</span></div>
       <div class="imp-card-note dui-note">📦 When multistop is needed, please send ATA at least <strong>2 days before</strong> customer Delivery date</div>`:''}
@@ -965,9 +1111,18 @@ function impCopySummary(idx,btn){
   const show=impAll.slice(0,maxCards);
   const s=show[idx];if(!s)return;const pn=impPort==='RTM'?'Rotterdam':'Antwerp';
   const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
+  // Get empty depot info for copy
+  const sizeType = getEmptySizeType(impSizeVal, impTypeVal);
+  const emptyDepot = lookupEmptyDepot(impZipVal, sizeType, impPort);
   let t=`IMPORT INLAND PLAN\nStatus: PLANNABLE${s.rec?' - RECOMMENDED':''}\nPort: ${pn}\nTerminal: ${impTName(s.loc)} (${s.loc})\nMode: ${s.mod} (${s.etdDay} schedule)\nTerminal ETD: ${fmt(s.etd)}\nDepot Arrival: ${fmt(s.eta)}\nCustomer Delivery: ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\nOrder Deadline: ${fmt(s.orderDL)}\n`;
   if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline: ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
   t+=`Truck Vendor: ${impTruckForTerm(s.loc)}\n`;
+  // Add empty depot info
+  if(emptyDepot){
+    t+=`\nEMPTY RETURN DEPOT (${getEmptySizeLabel(impSizeVal,impTypeVal)})\n`;
+    if(emptyDepot.p1==='REQUEST'){t+=`→ REQUEST INLAND OPS\n`;}
+    else{t+=`Preferred: ${emptyDepot.p1} — ${emptyDepot.p1n}\n`;if(emptyDepot.p2)t+=`2nd Option: ${emptyDepot.p2} — ${emptyDepot.p2n}\n`;}
+  }
   t+=`\nTransport Order Remarks: Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}\n`;
   if(impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'){
     t+=`\n⚠ DUISBURG REMINDERS\n- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)\n- When multistop is needed, send ATA at least 2 days before customer Delivery date\n`;
@@ -1007,11 +1162,6 @@ const EXP_DEPOTS={
 const EXP_TERM_NAMES={'NLROTTM':'APM Terminals Rotterdam','NLROTWG':'Rotterdam World Gateway','NLROT01':'Hutchison Ports Delta II','NLROT21':'ECT Delta Terminal','BEANT869':'PSA Europa Terminal','BEANT913':'PSA Noordzee Terminal'};
 
 const EXP_SCHED={
-  // DEDUI01 Hutchison Ports Duisburg — Rail (existing) + Barge (Nextlogic window, appended)
-  // Rail RTM: Thu dep → transit 1d, Sun dep → transit 2d
-  // Barge RTM (Nextlogic): Mon-Wed window → Thu arrival, Wed-Fri → Sat, Fri-Sun → Mon
-  //   All RTM barges serve: ECT Delta (NLROT21) / Delta II (NLROT01) / RWG (NLROTWG) / APMT-2 (NLROTTM)
-  // Barge ANR: Mon-Tue window → Fri arrival, Wed-Thu → Tue
   'DEDUI01':{RTM:[
     {mod:'Rail',dep:4,transit:1,buffer:2},{mod:'Rail',dep:7,transit:2,buffer:2},
     {mod:'Barge',dep:3,transit:1,buffer:2},{mod:'Barge',dep:5,transit:1,buffer:2},{mod:'Barge',dep:7,transit:1,buffer:2}
@@ -1024,12 +1174,6 @@ const EXP_SCHED={
   'DEG4TG':{RTM:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:4,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}],ANR:[{mod:'Barge',dep:3,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
   'DEMHG02':{RTM:[{mod:'Barge',dep:1,transit:4,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}],ANR:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:4,transit:3,buffer:1},{mod:'Barge',dep:6,transit:3,buffer:1}]},
   'DEMNZ01':{RTM:[{mod:'Barge',dep:1,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}],ANR:[{mod:'Barge',dep:2,transit:3,buffer:1},{mod:'Barge',dep:5,transit:4,buffer:1}]},
-  // Nürnberg Rail Export — RTM only, terminal-filtered from Hutchison Ports schedule
-  // NR11: Mon dep → transit 1d → Cargo Tue/Wed at ECT EMX (NLROT21), APMT-2 (NLROTTM), HP Delta II (NLROT01)
-  // NR31: Wed dep → transit 1d → Cargo Thu at RWG (NLROTWG), APMT-2 (NLROTTM), HP Delta II (NLROT01)
-  // NR41: Thu dep → transit 1d → Cargo Fri/Sat at HP Delta II (NLROT01), ECT EMX (NLROT21), APMT-2 (NLROTTM)
-  // NR51: Fri dep → transit 1d → Cargo Sat at HP Delta II (NLROT01), APMT-2 (NLROTTM), RWG (NLROTWG), ECT EMX (NLROT21)
-  // NR61: Sat dep → transit 2d → Cargo Mon at HP Delta II (NLROT01), APMT-2 (NLROTTM)
   'DENUE02':{RTM:[
     {mod:'Rail',dep:1,transit:1,buffer:2,terms:['NLROT21','NLROTTM','NLROT01']},
     {mod:'Rail',dep:3,transit:1,buffer:2,terms:['NLROTWG','NLROTTM','NLROT01']},
@@ -1059,7 +1203,6 @@ function expFindRule(zip){const z=parseInt(zip,10);for(const r of EXP_RULES){if(
 
 function expGetNextDeps(code,port,loadingDate,loadTimeStr,n=2,termCode){
   const sch=(EXP_SCHED[code]||{})[port];if(!sch||!sch.length)return{deps:[],skipped:[]};
-  // Filter schedules by terminal compatibility if terms array exists
   const filtered=termCode?sch.filter(s=>!s.terms||s.terms.includes(termCode)):sch;
   if(!filtered.length)return{deps:[],skipped:[]};
   const[lh,lm]=(loadTimeStr||'08:00').split(':').map(Number);const loadingAfterNoon=(lh*60+lm)>=720;
@@ -1077,6 +1220,9 @@ function expGetNextDeps(code,port,loadingDate,loadTimeStr,n=2,termCode){
   return{deps:found,skipped};
 }
 
+// Store export context for empty depot
+let expZipVal='',expSizeVal='',expTypeVal='',expPortVal='';
+
 function expRun(){
   const zip=document.getElementById('expZip').value.trim();const size=document.getElementById('expSize').value;
   const type=document.getElementById('expType').value;const loadDate=document.getElementById('expLoadDate').value;
@@ -1086,6 +1232,7 @@ function expRun(){
   if(!termVal){alert('Please select a terminal.');return;}
   const[termCode,yotStr,port]=termVal.split('|');const yot=parseInt(yotStr);const loadingDate=parseDate(loadDate);
   const rule=expFindRule(zip);
+  expZipVal=zip;expSizeVal=size;expTypeVal=type;expPortVal=port;
   document.getElementById('expEmpty').style.display='none';
   document.getElementById('expResult').style.display='block';
   // Context bar
@@ -1097,12 +1244,14 @@ function expRun(){
   document.getElementById('expCtxYot').textContent=`· ${yot}d YOT`;
   if(!rule){
     document.getElementById('expDepotRack').innerHTML=`<div class="no-sched">🚫 Postcode <strong>${zip}</strong> is not in the depot matrix. Contact the inland coordination team.</div>`;
-    document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';return;
+    document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';
+    document.getElementById('expEmptyDepotInfo').style.display='none';return;
   }
   const opts=port==='RTM'?rule.rtm:(rule.anr||rule.rtm);
   if(opts.p1===null){
     document.getElementById('expDepotRack').innerHTML=`<div class="no-sched-isr">🚢 This ZIP code area is not serviced via Antwerp by barge. Please select a Rotterdam terminal.</div>`;
-    document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';return;
+    document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';
+    document.getElementById('expEmptyDepotInfo').style.display='none';return;
   }
   // Depot pills
   function pill(code,rank,isrR,isMulti,multiTxt){
@@ -1122,6 +1271,7 @@ function expRun(){
   if(isDuisburg&&isImoReefer){
     document.getElementById('expDepotRack').innerHTML='';
     document.getElementById('expBargeTitle').style.display='none';
+    document.getElementById('expEmptyDepotInfo').style.display='none';
     document.getElementById('expBargeList').innerHTML=`<div style="margin:32px 0;padding:32px 24px;background:var(--rb);border:2px solid var(--red);border-radius:10px;text-align:center">
       <div style="font-size:36px;margin-bottom:12px">🚨</div>
       <div style="font-family:var(--fc);font-size:28px;font-weight:800;color:var(--red);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">ISR Required</div>
@@ -1134,6 +1284,16 @@ function expRun(){
   const deadlineDate=new Date(loadingDate);deadlineDate.setHours(lh2,lm2+180,0,0);
   document.getElementById('expCustomsVal').textContent=`${DN[deadlineDate.getDay()]} ${deadlineDate.getDate()} ${MN[deadlineDate.getMonth()]} ${deadlineDate.getFullYear()} · ${String(deadlineDate.getHours()).padStart(2,'0')}:${String(deadlineDate.getMinutes()).padStart(2,'0')} CET`;
   document.getElementById('expCustomsBanner').style.display=port==='RTM'?'flex':'none';
+  // Show empty container release info
+  const sizeType = getEmptySizeType(size, type);
+  const emptyDepot = lookupEmptyDepot(zip, sizeType, port);
+  const edEl = document.getElementById('expEmptyDepotInfo');
+  if(emptyDepot){
+    edEl.style.display='block';
+    edEl.innerHTML=`<div class="exp-empty-depot fade-in">${renderEmptyDepotHTML(emptyDepot,'export').replace('class="empty-depot-section"','style="border:none;background:none;padding:0;margin:0"')}</div>`;
+  } else {
+    edEl.style.display='none';
+  }
   document.getElementById('expBargeTitle').style.display='none';document.getElementById('expBargeList').innerHTML='';
   expSelectDepot(opts.p1);
 }
@@ -1145,7 +1305,6 @@ function expSelectDepot(code){
   document.querySelectorAll('#page-export .depot-pill[data-depot]').forEach(p=>p.classList.toggle('selected',p.dataset.depot===code));
   const bargeList=document.getElementById('expBargeList');const bargeTitle=document.getElementById('expBargeTitle');
   const[termCode,yotStr,port]=termVal.split('|');const yot=parseInt(yotStr);const loadingDate=parseDate(loadDate);
-  // Update route map
   const loadTimeStr=document.getElementById('expLoadTime').value||'08:00';
   const expMaxDeps=code==='DEDUI01'?3:2;
   const{deps,skipped}=expGetNextDeps(code,port,loadingDate,loadTimeStr,expMaxDeps,termCode);
@@ -1169,7 +1328,9 @@ function expSelectDepot(code){
 }
 
 function expBargeCard(dep,yot,ctx){
-  const modIcon=dep.mod==='Rail'?'🚂':'🛳';
+  const isBarge = dep.mod === 'Barge';
+  const modIcon = isBarge ? '🛳' : '🚂';
+  const modBannerClass = isBarge ? 'exp-barge' : 'exp-rail';
   const ccoMin=addDays(dep.eat,dep.buffer||2);const latestETA=addDays(dep.eat,yot-1);
   const orderDL=prevBizDay(addDays(dep.etd,-5));
   const odl=dFromNow(orderDL);
@@ -1178,8 +1339,19 @@ function expBargeCard(dep,yot,ctx){
   const hols=holidaysInRange(dep.etd,dep.eat);
   const holHtml=hols.length?`<div class="bc-holiday-warn">⚠ Public holiday in transit: ${hols.map(h=>fmtS(h)).join(', ')} — verify with depot</div>`:'';
   const dayN=DN[dep.etd.getDay()];const ds=dep.etd.getDate()+'/'+String(dep.etd.getMonth()+1).padStart(2,'0');
+  const transitDays = dep.eat ? Math.round((dep.eat - dep.etd) / 864e5) : '?';
+
+  // Empty depot info for copy
+  const sizeType = getEmptySizeType(expSizeVal, expTypeVal);
+  const emptyDepot = lookupEmptyDepot(expZipVal, sizeType, expPortVal);
+  let emptyDepotCopyData = '';
+  if(emptyDepot){
+    if(emptyDepot.p1==='REQUEST'){emptyDepotCopyData='REQUEST INLAND OPS';}
+    else{emptyDepotCopyData=emptyDepot.p1+'|'+emptyDepot.p1n+(emptyDepot.p2?'|'+emptyDepot.p2+'|'+emptyDepot.p2n:'');}
+  }
+
   return`<div class="bc${dep.isRecommended?' bc-recommended':''}">
-    <div class="bc-accent ${dep.mod.toLowerCase()}"></div>
+    <div class="exp-mod-banner ${modBannerClass}"><span class="exp-mod-icon">${modIcon}</span> ${dep.mod}<span class="exp-mod-transit">${transitDays}d transit</span></div>
     <div class="bc-body">
       <div class="bc-dep">
         <div class="bc-dep-tag">${modIcon} ${dep.mod} Departure</div>
@@ -1199,7 +1371,8 @@ function expBargeCard(dep,yot,ctx){
         <button class="copy-btn" onclick="expCopyBooking(this)"
           data-zip="${ctx.zip}" data-container="${ctx.container}" data-loaddate="${ctx.loadDate}" data-loadtime="${ctx.loadTime}"
           data-depot="${ctx.depotCode}" data-depotname="${ctx.depotName}" data-modality="${dep.mod}" data-etd="${fmt(dep.etd)}" data-etdshort="${dayN} ${ds}"
-          data-terminal="${ctx.termCode}" data-termname="${ctx.termName}" data-cco="${fmt(ccoMin)}" data-eta="${fmt(latestETA)}" data-orderdl="${fmt(orderDL)}">⎘ Copy Booking Summary</button>
+          data-terminal="${ctx.termCode}" data-termname="${ctx.termName}" data-cco="${fmt(ccoMin)}" data-eta="${fmt(latestETA)}" data-orderdl="${fmt(orderDL)}"
+          data-emptydepot="${emptyDepotCopyData}">⎘ Copy Booking Summary</button>
       </div>
     </div>
   </div>`;
@@ -1207,6 +1380,18 @@ function expBargeCard(dep,yot,ctx){
 
 function expCopyBooking(btn){
   const d=btn.dataset;
+  let emptyText = '';
+  if(d.emptydepot){
+    const sizeLabel = getEmptySizeLabel(expSizeVal, expTypeVal);
+    emptyText = `\n─────────────────────────────────\nEMPTY CONTAINER RELEASE (${sizeLabel})\n`;
+    if(d.emptydepot === 'REQUEST INLAND OPS'){
+      emptyText += `→ REQUEST INLAND OPS\n`;
+    } else {
+      const parts = d.emptydepot.split('|');
+      emptyText += `Preferred       : ${parts[0]} — ${parts[1]}\n`;
+      if(parts[2]) emptyText += `2nd Option      : ${parts[2]} — ${parts[3]}\n`;
+    }
+  }
   const text=[
     'MAERSK DE — EXPORT BOOKING SUMMARY','─────────────────────────────────',
     `Customer ZIP (PLZ)  : ${d.zip}`,`Container           : ${d.container}`,
@@ -1218,8 +1403,9 @@ function expCopyBooking(btn){
     '─────────────────────────────────',
     `Order Deadline      : ${d.orderdl}`,
     `Transport Order Remarks: Please plan on ${d.modality.toLowerCase()} departure with ETD ${d.etdshort}`,
+    emptyText,
     '─────────────────────────────────',
-    `Generated           : ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} · Maersk DE Inland Ops v2.0`,
+    `Generated           : ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} · Maersk DE Inland Ops v2.1`,
   ].join('\n');
   copyText(text,btn,'⎘ Copy Booking Summary');
 }
@@ -1229,6 +1415,8 @@ function expClear(){
   document.getElementById('expZip').value='';document.getElementById('expTerminal').value='';document.getElementById('expLoadDate').value='';
   document.getElementById('expCustomsBanner').style.display='none';document.getElementById('expImoReeferBanner').style.display='none';document.getElementById('expBargeTitle').style.display='none';
   document.getElementById('expBargeList').innerHTML='';
+  document.getElementById('expEmptyDepotInfo').style.display='none';
+  document.getElementById('expEmptyDepotInfo').innerHTML='';
 }
 
 // Export ref table
