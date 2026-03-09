@@ -1085,7 +1085,7 @@ function impRenderCards(scheds){
     const rb=s.rec?'<span class="imp-rec-badge">★ Recommended</span>':'';
     const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
     h+=`<div class="imp-card fade-in" style="animation-delay:${i*.08}s">
-      <div class="modality-banner ${modClass}"><span class="mod-icon">${modIcon}</span><span class="mod-label">${s.mod}</span><span class="mod-transit">${tr}d transit</span></div>
+      <div class="modality-banner ${modClass}"><span class="mod-icon">${modIcon}</span><span class="mod-label">${s.mod}</span></div>
       <div class="imp-card-header"><div class="imp-card-htop"><div class="imp-card-hleft"><span class="imp-card-depot">${impTName(s.loc)}</span><span class="imp-card-code">${s.loc}</span></div><div><span class="imp-status-badge imp-status-plannable">PLANNABLE</span></div></div>
       <div class="imp-card-hmeta">${rb}</div></div>
       <div class="imp-card-body">
@@ -1352,7 +1352,7 @@ function expBargeCard(dep,yot,ctx){
   }
 
   return`<div class="bc${dep.isRecommended?' bc-recommended':''}">
-    <div class="exp-mod-banner ${modBannerClass}"><span class="exp-mod-icon">${modIcon}</span> ${dep.mod}<span class="exp-mod-transit">${transitDays}d transit</span></div>
+    <div class="exp-mod-banner ${modBannerClass}"><span class="exp-mod-icon">${modIcon}</span> ${dep.mod}</div>
     <div class="bc-body">
       <div class="bc-dep">
         <div class="bc-dep-tag">${modIcon} ${dep.mod} Departure</div>
