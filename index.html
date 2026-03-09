@@ -1207,15 +1207,15 @@ function expGetNextDeps(code,port,loadingDate,loadTimeStr,n=2,termCode){
   const filtered=termCode?sch.filter(s=>!s.terms||s.terms.includes(termCode)):sch;
   if(!filtered.length)return{deps:[],skipped:[]};
   const[lh,lm]=(loadTimeStr||'08:00').split(':').map(Number);const loadingAfterNoon=(lh*60+lm)>=720;
+  // Order deadline = 2 business days before loading date
+  const expOrderDL=prevBizDay(addDays(loadingDate,-2));const nowDL=new Date();nowDL.setHours(0,0,0,0);
+  if(nowDL>=expOrderDL)return{deps:[],skipped:[],orderDLPassed:true};
   const found=[];const skipped=[];
   for(let offset=0;offset<=25&&found.length<n;offset++){
     const d=addDays(loadingDate,offset);const dow=jsDay(d);
     for(const s of filtered){
       if(s.dep!==dow)continue;if(offset===0)continue;
       if(offset===1&&loadingAfterNoon){skipped.push({mod:s.mod,etd:new Date(d),reason:'next-day-cutoff'});continue;}
-      // Skip if order deadline (5 biz days before inland ETD) has already passed
-      const dlCheck=prevBizDay(addDays(d,-5));const nowCheck=new Date();nowCheck.setHours(0,0,0,0);
-      if(nowCheck>=dlCheck)continue;
       if(found.length<n){
         found.push({mod:s.mod,etd:new Date(d),eat:addDays(d,s.transit),buffer:s.buffer||2,offset,nextDayCutoff:offset===1&&!loadingAfterNoon});
       }
@@ -1311,10 +1311,12 @@ function expSelectDepot(code){
   const[termCode,yotStr,port]=termVal.split('|');const yot=parseInt(yotStr);const loadingDate=parseDate(loadDate);
   const loadTimeStr=document.getElementById('expLoadTime').value||'08:00';
   const expMaxDeps=code==='DEDUI01'?3:2;
-  const{deps,skipped}=expGetNextDeps(code,port,loadingDate,loadTimeStr,expMaxDeps,termCode);
+  const{deps,skipped,orderDLPassed}=expGetNextDeps(code,port,loadingDate,loadTimeStr,expMaxDeps,termCode);
   const name=EXP_DEPOTS[code]||code;
   bargeTitle.style.display='block';bargeTitle.textContent=`${name} — Departures & Vessel Booking Window`;
-  if(!deps.length){
+  if(orderDLPassed){
+    bargeList.innerHTML=`<div class="no-sched">⏰ Order deadline has passed for loading date <strong>${fmtS(loadingDate)}</strong>. Orders must be placed at least 2 business days before loading. Please select a later loading date.</div>`;
+  } else if(!deps.length){
     let skipN='';
     if(skipped.length){const s=skipped[0];skipN=`<div class="bc-skipped">${s.mod==='Rail'?'🚂':'🛳'} <strong>${s.mod} on ${fmtS(s.etd)}</strong> was skipped — loading after 12:00 does not allow enough time.</div>`;}
     const noSchedDepots=['DEMUN01','DETREAZ','DEDTM01'];
@@ -1325,7 +1327,7 @@ function expSelectDepot(code){
     deps[0].isRecommended=true;
     let skipN='';if(skipped.length){const s=skipped[0];skipN=`<div class="bc-skipped">${s.mod==='Rail'?'🚂':'🛳'} <strong>${s.mod} on ${fmtS(s.etd)}</strong> skipped — loading after 12:00 is too late.</div>`;}
     const termName=EXP_TERM_NAMES[termCode]||termCode;const zip2=document.getElementById('expZip').value;
-    const ctx={zip:zip2,container:`${document.getElementById('expSize').value}' ${document.getElementById('expType').value}`,loadDate,loadTime:loadTimeStr,depotCode:code,depotName:name,termCode,termName};
+    const ctx={zip:zip2,container:`${document.getElementById('expSize').value}' ${document.getElementById('expType').value}`,loadDate,loadTime:loadTimeStr,depotCode:code,depotName:name,termCode,termName,loadingDate};
     bargeList.innerHTML=skipN+deps.map(d=>expBargeCard(d,yot,ctx)).join('');
   }
   setTimeout(()=>bargeTitle.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
@@ -1336,7 +1338,7 @@ function expBargeCard(dep,yot,ctx){
   const modIcon = isBarge ? '🛳' : '🚂';
   const modBannerClass = isBarge ? 'exp-barge' : 'exp-rail';
   const ccoMin=addDays(dep.eat,dep.buffer||2);const latestETA=addDays(dep.eat,yot-1);
-  const orderDL=prevBizDay(addDays(dep.etd,-5));
+  const orderDL=prevBizDay(addDays(ctx.loadingDate,-2));
   const odl=dFromNow(orderDL);
   const recBadge=dep.isRecommended?'<div class="bc-rec-badge">✓ Recommended</div>':'';
   const cutoffNote=dep.nextDayCutoff?'<div class="bc-cutoff-note">⏰ Load before 12:00 to make this departure</div>':'';
