@@ -646,7 +646,7 @@ footer{background:var(--ink);padding:10px 24px;display:flex;align-items:center;g
           <tr><td class="cid">EC-3</td><td>ZIP not covered</td><td>"Postcode not in matrix. Contact inland team."</td></tr>
           <tr><td class="cid">EC-4</td><td>IMO / Reefer via Duisburg (export)</td><td>ISR warning banner shown — on request only</td></tr>
           <tr><td class="cid">EC-5</td><td>No import rail to Frankenbach/Germersheim</td><td>Only barge options shown for these terminals</td></tr>
-          <tr><td class="cid">EC-6</td><td>Order deadline passed (import)</td><td>Still shown as plannable — urgency tags indicate tight timing</td></tr>
+          <tr><td class="cid">EC-6</td><td>Order deadline passed (import/export)</td><td>Schedule silently excluded — only bookable options with valid deadlines are shown</td></tr>
         </table></div>
       </div></div>
       <div class="psec" id="s9"><div class="psh" onclick="toggleSec('s9')"><span class="psn">09</span><span class="pst">Assumptions</span><span class="psc">▼</span></div>
@@ -980,7 +980,7 @@ function impComputeInst(sched,vesselETD,vesselTime,port,isFuture,weeks){
     let depotArr=impNextWD(addDays(termETD,1),etaDow);
     if(depotArr<=termETD)depotArr=addDays(depotArr,7);
     const custDel=nextBizDay(addDays(depotArr,1));
-    const orderDL=prevBizDay(addDays(termETD,isFuture?-7:-5));
+    const orderDL=prevBizDay(addDays(termETD,-7));
     // Skip if order deadline has already passed
     if(now>=orderDL)continue;
     let custDL=null;
@@ -1213,6 +1213,9 @@ function expGetNextDeps(code,port,loadingDate,loadTimeStr,n=2,termCode){
     for(const s of filtered){
       if(s.dep!==dow)continue;if(offset===0)continue;
       if(offset===1&&loadingAfterNoon){skipped.push({mod:s.mod,etd:new Date(d),reason:'next-day-cutoff'});continue;}
+      // Skip if order deadline (5 biz days before inland ETD) has already passed
+      const dlCheck=prevBizDay(addDays(d,-5));const nowCheck=new Date();nowCheck.setHours(0,0,0,0);
+      if(nowCheck>=dlCheck)continue;
       if(found.length<n){
         found.push({mod:s.mod,etd:new Date(d),eat:addDays(d,s.transit),buffer:s.buffer||2,offset,nextDayCutoff:offset===1&&!loadingAfterNoon});
       }
