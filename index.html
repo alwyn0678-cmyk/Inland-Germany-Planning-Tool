@@ -771,8 +771,12 @@ function getEmptySizeLabel(size, type) {
 }
 
 // Lookup empty depot for a given zip, size type, port
-function lookupEmptyDepot(zip, sizeType, port) {
+function lookupEmptyDepot(zip, sizeType, port, direction) {
   const z = parseInt(zip, 10);
+  // Import override: 55000-59999 always returns DEG4TG Gustavsburg Contargo
+  if (direction === 'import' && z >= 55000 && z <= 59999) {
+    return {p1:'DEG4TG',p1n:'Gustavsburg Contargo',p2:null,p2n:null};
+  }
   const table = EMPTY_DEPOTS[sizeType];
   if (!table) return null;
   for (const row of table) {
@@ -1073,7 +1077,7 @@ function impRun(){
 function impRenderCards(scheds){
   // Get empty depot info
   const sizeType = getEmptySizeType(impSizeVal, impTypeVal);
-  const emptyDepot = lookupEmptyDepot(impZipVal, sizeType, impPort);
+  const emptyDepot = lookupEmptyDepot(impZipVal, sizeType, impPort, 'import');
   const emptyDepotHTML = renderEmptyDepotHTML(emptyDepot, 'import');
 
   let h='<div class="imp-cards">';
@@ -1114,7 +1118,7 @@ function impCopySummary(idx,btn){
   const dayN=DN[s.etd.getDay()];const ds=s.etd.getDate()+'/'+String(s.etd.getMonth()+1).padStart(2,'0');
   // Get empty depot info for copy
   const sizeType = getEmptySizeType(impSizeVal, impTypeVal);
-  const emptyDepot = lookupEmptyDepot(impZipVal, sizeType, impPort);
+  const emptyDepot = lookupEmptyDepot(impZipVal, sizeType, impPort, 'import');
   let t=`IMPORT INLAND PLAN\nStatus: PLANNABLE${s.rec?' - RECOMMENDED':''}\nPort: ${pn}\nTerminal: ${impTName(s.loc)} (${s.loc})\nMode: ${s.mod} (${s.etdDay} schedule)\nTerminal ETD: ${fmt(s.etd)}\nDepot Arrival: ${fmt(s.eta)}\nCustomer Delivery: ${fmt(s.custDel)}${s.loc==='DEDUI01'?' (after 12:00)':''}\nOrder Deadline: ${fmt(s.orderDL)}\n`;
   if(impPort==='RTM'&&s.custDL)t+=`Customs Deadline: ${fmt(s.custDL)} ${s.custDL.getHours()}:${String(s.custDL.getMinutes()).padStart(2,'0')}\n`;
   t+=`Truck Vendor: ${impTruckForTerm(s.loc)}\n`;
@@ -1288,7 +1292,7 @@ function expRun(){
   document.getElementById('expCustomsBanner').style.display=port==='RTM'?'flex':'none';
   // Show empty container release info
   const sizeType = getEmptySizeType(size, type);
-  const emptyDepot = lookupEmptyDepot(zip, sizeType, port);
+  const emptyDepot = lookupEmptyDepot(zip, sizeType, port, 'export');
   const edEl = document.getElementById('expEmptyDepotInfo');
   if(emptyDepot){
     edEl.style.display='block';
@@ -1347,7 +1351,7 @@ function expBargeCard(dep,yot,ctx){
 
   // Empty depot info for copy
   const sizeType = getEmptySizeType(expSizeVal, expTypeVal);
-  const emptyDepot = lookupEmptyDepot(expZipVal, sizeType, expPortVal);
+  const emptyDepot = lookupEmptyDepot(expZipVal, sizeType, expPortVal, 'export');
   let emptyDepotCopyData = '';
   if(emptyDepot){
     if(emptyDepot.p1==='REQUEST'){emptyDepotCopyData='REQUEST INLAND OPS';}
