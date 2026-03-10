@@ -792,7 +792,7 @@ function renderEmptyDepotHTML(depot, direction) {
     rows = `<div class="empty-depot-row"><span class="edp-request">⚠ REQUEST INLAND OPS — Contact inland team for empty depot assignment</span></div>`;
   } else {
     rows += `<div class="empty-depot-row"><span class="edp-rank edp-pref">1</span><span class="edp-code">${depot.p1}</span><span class="edp-name">${depot.p1n}</span><span style="font-family:var(--fm);font-size:9px;color:var(--grn);font-weight:700;margin-left:auto">PREFERRED</span></div>`;
-    if (depot.p2) {
+    if (depot.p2 && direction === 'export') {
       rows += `<div class="empty-depot-row"><span class="edp-rank edp-alt">2</span><span class="edp-code">${depot.p2}</span><span class="edp-name">${depot.p2n}</span><span style="font-family:var(--fm);font-size:9px;color:var(--amb);font-weight:700;margin-left:auto">2ND OPTION</span></div>`;
     }
   }
@@ -898,7 +898,7 @@ RTM:{
 '49':{b:'DEDUI01',r:'DEDTM01',t:'HP Duisburg'},'50':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '51':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'52':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '53':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'54':{b:'DETREAZ',r:'DETREAZ',t:'AZS Trier'},
-'55':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},'56':{b:'DEBNX01',r:null,t:'AZS Bonn'},
+'55':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},'56':{b:'DEBNX01',r:null,t:'AZS Bonn'},
 '57':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'58':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '59':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'60':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},
 '61':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},'62':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},'63':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},
@@ -933,7 +933,7 @@ ANR:{
 '48':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'49':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '50':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'51':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '52':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'53':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
-'54':{b:'DETREAZ',r:'DETREAZ',t:'AZS Trier'},'55':{b:'DEMNZ01',r:null,t:'Frankenbach Mainz'},
+'54':{b:'DETREAZ',r:'DETREAZ',t:'AZS Trier'},'55':{b:'DE9G4TG',r:null,t:'Contargo Gustavsburg'},
 '56':{b:'DEBNX01',r:'DEBNX01',t:'AZS Bonn'},'57':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '58':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},'59':{b:'DEDUI01',r:'DEDUI01',t:'HP Duisburg'},
 '60':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},'61':{b:'DE9G4TG',r:'DE9G4TG',t:'Contargo Gustavsburg'},
@@ -1097,8 +1097,8 @@ function impRenderCards(scheds){
       </div>
       ${emptyDepotHTML}
       <div class="imp-card-note transport-note">📝 Remarks: <code>Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}</code></div>
-      ${impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'?`<div class="imp-card-note dui-note">📧 Always send copy of Customs document to <strong>nlaopsinlrbc@maersk.com</strong> <span style="color:var(--red);font-weight:700">(DO NOT send this to us)</span></div>
-      <div class="imp-card-note dui-note">📦 When multistop is needed, please send ATA at least <strong>2 days before</strong> customer Delivery date</div>`:''}
+      <div class="imp-card-note dui-note">📧 Always send copy of Customs document to <strong>nlaopsinlrbc@maersk.com</strong> <span style="color:var(--red);font-weight:700">(DO NOT send this to us)</span></div>
+      <div class="imp-card-note dui-note">📦 When multistop is needed, please send ATA at least <strong>2 days before</strong> customer Delivery date</div>
       <div class="imp-card-footer"><span class="imp-card-vendor">Truck: ${impTruckForTerm(s.loc)}</span><div class="imp-card-btns">
         <button class="copy-btn" onclick="impCopySummary(${i},this)">⎘ Copy Summary</button>
       </div></div></div>`;
@@ -1122,12 +1122,10 @@ function impCopySummary(idx,btn){
   if(emptyDepot){
     t+=`\nEMPTY RETURN DEPOT (${getEmptySizeLabel(impSizeVal,impTypeVal)})\n`;
     if(emptyDepot.p1==='REQUEST'){t+=`→ REQUEST INLAND OPS\n`;}
-    else{t+=`Preferred: ${emptyDepot.p1} — ${emptyDepot.p1n}\n`;if(emptyDepot.p2)t+=`2nd Option: ${emptyDepot.p2} — ${emptyDepot.p2n}\n`;}
+    else{t+=`Preferred: ${emptyDepot.p1} — ${emptyDepot.p1n}\n`;}
   }
   t+=`\nTransport Order Remarks: Please plan on ${s.mod.toLowerCase()} departure with ETD ${dayN} ${ds}\n`;
-  if(impPort==='RTM'&&impScCode(s.loc)==='DEDUI01'){
-    t+=`\n⚠ DUISBURG REMINDERS\n- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)\n- When multistop is needed, send ATA at least 2 days before customer Delivery date\n`;
-  }
+  t+=`\n⚠ REMINDERS\n- Always send copy of Customs document to nlaopsinlrbc@maersk.com (DO NOT send this to us)\n- When multistop is needed, send ATA at least 2 days before customer Delivery date\n`;
   copyText(t,btn,'⎘ Copy Summary');
 }
 
